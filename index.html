@@ -1,0 +1,1657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>amp subscription status</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..600&family=Geist:wght@300..600&family=JetBrains+Mono:wght@300..500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fafaf9;
+    --surface: #ffffff;
+    --surface-alt: #f7f6f4;
+    --border: #e7e5e4;
+    --border-strong: #d6d3d1;
+    --text: #18181b;
+    --text-mute: #57534e;
+    --text-dim: #a8a29e;
+    --orange: #ea580c;
+    --orange-soft: #fb923c;
+    --orange-pale: #fff4ec;
+    --orange-tint: #fef0e6;
+    --black: #18181b;
+    --gray-700: #44403c;
+    --gray-500: #78716c;
+    --gray-400: #a8a29e;
+    --gray-300: #d6d3d1;
+    --gray-200: #e7e5e4;
+    --gray-100: #f5f5f4;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Geist', system-ui, -apple-system, sans-serif;
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  .serif { font-family: 'Fraunces', serif; }
+  h1, h2, h3, h4 { margin: 0; }
+
+  /* ===== HEADER ===== */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+  .container { max-width: 1320px; margin: 0 auto; padding: 0 32px; }
+  .header-inner {
+    padding: 28px 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--text-mute);
+    margin-bottom: 10px;
+  }
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-size: 34px;
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    color: var(--black);
+    line-height: 1;
+  }
+  .subtitle {
+    margin: 12px 0 0;
+    color: var(--text-mute);
+    max-width: 580px;
+    font-size: 13.5px;
+  }
+  .meta {
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-mute);
+    line-height: 1.9;
+  }
+  .meta-row { display: flex; justify-content: flex-end; gap: 10px; }
+  .meta-key { color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.12em; font-size: 10px; }
+  .meta-val { color: var(--text); }
+  .meta-val.accent { color: var(--orange); }
+
+  /* ===== LAYOUT ===== */
+  main { padding: 28px 0 48px; }
+  .section { margin-bottom: 28px; }
+  .sec-label {
+    margin: 0 0 14px;
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .sec-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--gray-500);
+    letter-spacing: 0.15em;
+  }
+  .sec-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--black);
+    letter-spacing: -0.005em;
+  }
+  .sec-rule {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+    margin-bottom: 4px;
+  }
+
+  .grid { display: grid; gap: 12px; }
+  .grid-5 { grid-template-columns: repeat(5, 1fr); }
+  .grid-2 { grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-2-3 { grid-template-columns: 2fr 3fr; gap: 16px; }
+  @media (max-width: 1024px) {
+    .grid-5 { grid-template-columns: repeat(2, 1fr); }
+    .grid-2, .grid-2-3 { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    overflow: visible;
+    position: relative;
+  }
+  .card-clip { overflow: hidden; }
+  .card-head {
+    padding: 14px 18px 12px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .card-head-title { display: flex; flex-direction: column; gap: 2px; }
+  .card-head-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--text-mute);
+  }
+  .card-head h3 {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--black);
+    letter-spacing: -0.005em;
+  }
+  .card-head-sub {
+    font-size: 12px;
+    color: var(--text-mute);
+    margin-top: 2px;
+  }
+  .card-head-meta {
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .card-foot {
+    padding: 12px 18px 14px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--text-mute);
+  }
+  .card-foot.no-border { border-top: none; padding-top: 0; }
+
+  /* ===== KPI CARDS ===== */
+  .kpi { padding: 16px 16px 14px; }
+  .kpi-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .kpi-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--text-mute);
+  }
+  .kpi-trend {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+  }
+  .kpi-value {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-weight: 400;
+    color: var(--black);
+    letter-spacing: -0.015em;
+    line-height: 1.05;
+  }
+  .kpi-sub {
+    margin-top: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-mute);
+  }
+  .kpi-spark { margin-top: 10px; height: 26px; }
+
+  /* ===== TOGGLE ===== */
+  .toggle {
+    display: flex;
+    gap: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.13em;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .toggle button {
+    padding: 5px 11px;
+    border: none;
+    background: transparent;
+    color: var(--text-mute);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: inherit;
+    text-transform: inherit;
+    letter-spacing: inherit;
+    transition: all 120ms ease;
+  }
+  .toggle button:not(:last-child) { border-right: 1px solid var(--border); }
+  .toggle button:hover { color: var(--text); }
+  .toggle button.active {
+    color: var(--orange);
+    background: var(--orange-pale);
+  }
+
+  /* ===== LEGEND ===== */
+  .legend {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-mute);
+    flex-wrap: wrap;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-swatch { width: 10px; height: 10px; }
+  .legend-line { display: inline-block; width: 14px; height: 1px; }
+
+  /* ===== CHARTS ===== */
+  .chart-area { padding: 16px 18px 18px; overflow: visible; }
+  .chart-area svg { display: block; width: 100%; height: 100%; overflow: visible; }
+  .axis-text { fill: var(--text-mute); font-family: 'JetBrains Mono', monospace; font-size: 10px; }
+  .axis-line { stroke: var(--border-strong); }
+  .grid-line { stroke: var(--border); stroke-dasharray: 2 4; }
+  .ref-line { stroke-dasharray: 3 3; }
+  .ref-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+  .crosshair { stroke: var(--gray-500); stroke-dasharray: 2 3; opacity: 0; pointer-events: none; }
+  .hover-overlay { fill: transparent; cursor: crosshair; }
+
+  /* ===== INSIGHTS BAR ===== */
+  .insights {
+    padding: 14px 18px 16px;
+    border-top: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  @media (max-width: 768px) { .insights { grid-template-columns: 1fr; gap: 14px; } }
+  .insight-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    margin-bottom: 4px;
+  }
+  .insight-body {
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--text-mute);
+  }
+  .insight-body span.em { color: var(--text); }
+
+  /* ===== HEATMAP ===== */
+  .heatmap-wrap { padding: 16px 18px; overflow-x: auto; }
+  .heatmap-legend {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.13em;
+    color: var(--text-mute);
+    flex-wrap: wrap;
+  }
+  .heatmap-legend-item { display: flex; align-items: center; gap: 6px; }
+  .heatmap-legend-swatch { width: 12px; height: 12px; border: 1px solid var(--border); }
+  .heatmap-grid {
+    display: grid;
+    gap: 3px;
+    min-width: 800px;
+  }
+  .heatmap-header {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.13em;
+    color: var(--text-mute);
+    padding-bottom: 6px;
+  }
+  .heatmap-header.center { text-align: center; }
+  .heatmap-header.right { text-align: right; padding-right: 8px; }
+  .heatmap-header.accent { color: var(--orange); }
+  .heatmap-row-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text);
+  }
+  .heatmap-row-label.ft { color: var(--orange); }
+  .heatmap-ft-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--orange); }
+  .heatmap-row-size {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 4px 8px 4px 0;
+    text-align: right;
+    color: var(--text-mute);
+  }
+  .heat-cell {
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    transition: transform 120ms ease, box-shadow 120ms ease;
+    cursor: default;
+  }
+  .heat-cell:hover {
+    transform: scale(1.1);
+    z-index: 10;
+    box-shadow: 0 0 0 1.5px var(--orange);
+    position: relative;
+  }
+  .heatmap-foot {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--text-mute);
+  }
+  #cohort-hover { color: var(--orange); margin-left: auto; }
+
+  /* ===== WATERFALL TABLE ===== */
+  .table-wrap { padding: 0; overflow-x: auto; }
+  .waterfall {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    min-width: 1100px;
+  }
+  .waterfall thead th {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-mute);
+    font-weight: 400;
+    padding: 14px 8px 10px;
+    text-align: right;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .waterfall thead th.metric-header {
+    text-align: left;
+    padding-left: 18px;
+    width: 220px;
+    color: var(--text);
+  }
+  .waterfall thead th.current {
+    color: var(--orange);
+    background: var(--orange-pale);
+  }
+  .waterfall tbody td {
+    padding: 8px;
+    text-align: right;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .waterfall tbody td.metric-cell {
+    text-align: left;
+    padding-left: 18px;
+    color: var(--text);
+    font-family: 'Geist', sans-serif;
+    font-size: 13px;
+  }
+  .waterfall tbody td.metric-cell .sign {
+    display: inline-block;
+    width: 12px;
+    text-align: center;
+    margin-right: 6px;
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .waterfall tbody td.current { background: var(--orange-pale); }
+  .waterfall tbody tr.row-starting td { color: var(--text-mute); }
+  .waterfall tbody tr.row-new td.value { color: var(--gray-700); }
+  .waterfall tbody tr.row-churned td.value { color: var(--orange); }
+  .waterfall tbody tr.row-ending td { font-weight: 500; color: var(--black); border-bottom: 1px solid var(--border-strong); }
+  .waterfall tbody tr.row-ending td.metric-cell { color: var(--black); font-weight: 500; }
+  .waterfall tbody tr.row-churnpct td { color: var(--text-mute); padding-top: 10px; padding-bottom: 10px; }
+  .waterfall tbody tr.row-churnpct td.metric-cell { color: var(--text-mute); font-style: normal; font-size: 12px; }
+  .waterfall tbody tr.row-churnpct td.value { font-size: 11.5px; }
+  .waterfall tbody td.zero { color: var(--text-dim); }
+
+  /* ===== TOOLTIP ===== */
+  .tooltip {
+    position: fixed;
+    pointer-events: none;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    box-shadow: 0 6px 20px rgba(24, 24, 27, 0.08);
+    padding: 10px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 80ms ease;
+    min-width: 160px;
+    border-radius: 3px;
+  }
+  .tooltip.visible { opacity: 1; }
+  .tooltip-month {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--text-mute);
+    margin-bottom: 6px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .tooltip-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 0;
+  }
+  .tooltip-row .swatch { width: 8px; height: 8px; flex-shrink: 0; }
+  .tooltip-row .label { color: var(--text-mute); flex: 1; }
+  .tooltip-row .val { color: var(--text); font-feature-settings: 'tnum'; }
+
+  /* ===== SUMMARY STATS (FTC card head) ===== */
+  .stats-row { display: flex; gap: 16px; }
+  .stat { text-align: right; }
+  .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--text-mute);
+  }
+  .stat-value {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1.1;
+  }
+
+  /* ===== ARPU FOOTER ROW ===== */
+  .stats-foot {
+    padding: 12px 18px 14px;
+    border-top: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .stats-foot-cell-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--text-dim);
+    margin-bottom: 2px;
+  }
+  .stats-foot-cell-value {
+    font-family: 'Fraunces', serif;
+    font-size: 17px;
+    font-weight: 400;
+  }
+
+  /* ===== FOOTER ===== */
+  footer {
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text-dim);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <div class="header-inner">
+      <div>
+        <div class="eyebrow">Subscription Intelligence · Internal</div>
+        <h1>amp subscription status</h1>
+        <p class="subtitle">Tracking the rollout of the 12-month free-trial cohort and the April paywall, alongside core acquisition and retention metrics.</p>
+      </div>
+      <div class="meta">
+        <div class="meta-row"><span class="meta-key">Period</span><span class="meta-val">Jan '25 — Apr '26</span></div>
+        <div class="meta-row"><span class="meta-key">Customers</span><span class="meta-val">6,329</span></div>
+        <div class="meta-row"><span class="meta-key">Updated</span><span class="meta-val accent">Apr 29, 2026</span></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+<div class="container">
+
+<!-- ===== KPI STRIP ===== -->
+<section class="section">
+  <div class="grid grid-5" id="kpi-grid"></div>
+</section>
+
+<!-- ===== 01 Upcoming Free-Trial Expirations ===== -->
+<section class="section">
+  <div class="sec-label">
+    <span class="sec-num">01</span>
+    <span class="sec-title">Upcoming free-trial expirations</span>
+    <span class="sec-rule"></span>
+  </div>
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-title">
+        <h3>12-month free trials reaching their cliff</h3>
+        <p class="card-head-sub">Q1/Q2 '25 cohorts (1,125 customers, identified by ≥9 consecutive months of $0 revenue) hitting the 12-month commitment end on a rolling basis. May–Jun '26 still ahead — <span style="color:var(--orange)">510 currently active customers</span> approaching cliff; ~120 projected to churn based on the 33–35% cliff loss observed in Feb–Apr '25 cohorts.</p>
+      </div>
+      <div class="card-head-meta">
+        <div class="stats-row">
+          <div class="stat">
+            <div class="stat-label">At cliff (May–Jun)</div>
+            <div class="stat-value" style="color:var(--orange)">510</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Proj. churn</div>
+            <div class="stat-value" style="color:var(--orange)">~120</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="chart-area" style="height:360px"><svg id="chart-cliff"></svg></div>
+    <div class="card-foot">
+      Each bar is one Q1/Q2 '25 cohort plotted at its 12-month cliff month. Past/current cliffs show actual outcome (orange = retained, gray = lost). Upcoming cliffs show the at-risk pool plus the projected churn at ~30%, the rate observed in the Feb–Apr '25 cohorts. The remaining ~70% are expected to convert to paid. Cohort defined as: started as $0 trial in Feb–Jun '25 AND had ≥9 consecutive months of $0 revenue.
+    </div>
+  </div>
+</section>
+
+<!-- ===== 02 Subscriber Composition ===== -->
+<section class="section">
+  <div class="sec-label">
+    <span class="sec-num">02</span>
+    <span class="sec-title">Subscriber composition</span>
+    <span class="sec-rule"></span>
+  </div>
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-title">
+        <h3>Active subscribers, paid vs trial</h3>
+        <p class="card-head-sub">Stacked monthly counts with churn rate overlaid; vertical markers indicate the trial-expiry wave (Jan '26) and paywall launch (Apr '26).</p>
+      </div>
+      <div class="card-head-meta">
+        <div class="toggle">
+          <button class="active" data-view="absolute" onclick="setView('absolute')">Absolute</button>
+          <button data-view="percent" onclick="setView('percent')">% Mix</button>
+        </div>
+      </div>
+    </div>
+    <div class="chart-area" style="height:340px"><svg id="chart-composition"></svg></div>
+    <div class="legend" style="padding: 0 18px 12px">
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--orange)"></span>Paid</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--gray-300)"></span>Trial</span>
+      <span class="legend-item"><span class="legend-line" style="background:var(--black)"></span>Churn rate (right axis)</span>
+    </div>
+    <div class="insights">
+      <div>
+        <div class="insight-eyebrow" style="color:var(--orange)">Free-trial cliff</div>
+        <div class="insight-body">The Q1/Q2 '25 trial cohort began rolling off in Jan '26. Trial count peaked at 1,566 in Nov '25 and is now <span class="em">down to 804</span>.</div>
+      </div>
+      <div>
+        <div class="insight-eyebrow" style="color:var(--black)">Paywall</div>
+        <div class="insight-body">In Apr '26, 10% of accounts were paywalled. Trial count dropped 29% MoM (1,131 → 804) while paid subs grew <span class="em">8.9%</span>.</div>
+      </div>
+      <div>
+        <div class="insight-eyebrow" style="color:var(--gray-700)">Revenue scaling</div>
+        <div class="insight-body">MRR up 10.5% MoM despite the active-sub plateau — the mix shift to paid is monetizing what was sitting free. <span class="em">ARPU 3.1× in 6 months</span>.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 02 Cumulative vs Active ===== -->
+<section class="section">
+  <div class="sec-label">
+    <span class="sec-num">03</span>
+    <span class="sec-title">Acquired vs active</span>
+    <span class="sec-rule"></span>
+  </div>
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-title">
+        <h3>Cumulative customers acquired vs currently active</h3>
+        <p class="card-head-sub">The gap between the two lines is customers we acquired but no longer retain. As of Apr '26: <span style="color:var(--orange)">1,429 customers lost</span> against 6,329 ever acquired. Of that 1,429 lost: <span style="color:var(--orange)">~271 (19%) attributable to free-trial cliff</span>; ~1,158 (81%) is non-cliff churn (regular subscription attrition + paywall effect).</p>
+      </div>
+      <div class="card-head-meta">
+        <div class="stats-row">
+          <div class="stat">
+            <div class="stat-label">Acquired</div>
+            <div class="stat-value" style="color:var(--gray-700)">6,329</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Active</div>
+            <div class="stat-value" style="color:var(--black)">4,900</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Lost</div>
+            <div class="stat-value" style="color:var(--orange)">1,429</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="chart-area" style="height:340px"><svg id="chart-cumulative"></svg></div>
+    <div class="legend" style="padding: 0 18px 10px">
+      <span class="legend-item"><span class="legend-line" style="background:var(--gray-700);height:2px"></span>Cumulative acquired</span>
+      <span class="legend-item"><span class="legend-line" style="background:var(--black);height:2px"></span>Currently active</span>
+      <span class="legend-item"><span class="legend-swatch" style="background:var(--orange-tint);border:1px solid var(--orange-soft)"></span>Lost (gap)</span>
+    </div>
+    <div style="padding: 0 18px 16px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.13em;color:var(--text-mute);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">
+        <span>Attribution of 1,429 cumulative churn</span>
+        <span style="color:var(--text-dim);text-transform:none;letter-spacing:0">free-trial cliff vs. all other</span>
+      </div>
+      <div style="display:flex;height:14px;border:1px solid var(--border);border-radius:2px;overflow:hidden">
+        <div style="width:19%;background:var(--orange);display:flex;align-items:center;justify-content:center;color:#fff;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500">271</div>
+        <div style="width:81%;background:var(--gray-200);display:flex;align-items:center;justify-content:center;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500">1,158</div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-mute);margin-top:4px">
+        <span><span style="color:var(--orange)">●</span> Free-trial cliff (FT cohort, M11+) · 19%</span>
+        <span><span style="color:var(--gray-500)">●</span> Other (regular attrition + paywall) · 81%</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 03 Subscription Waterfall Table ===== -->
+<section class="section">
+  <div class="sec-label">
+    <span class="sec-num">04</span>
+    <span class="sec-title">Monthly waterfall</span>
+    <span class="sec-rule"></span>
+  </div>
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-title">
+        <h3>Subscriber movement by month</h3>
+        <p class="card-head-sub">Starting + new − churned ≈ ending. Small differences reflect reactivated customers (those who churned previously and returned). Apr '26 column reflects partial-month data.</p>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <div id="waterfall-table"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 04 Monthly Churn + FTC ===== -->
+<section class="section">
+  <div class="sec-label">
+    <span class="sec-num">05</span>
+    <span class="sec-title">Churn dynamics</span>
+    <span class="sec-rule"></span>
+  </div>
+  <div class="grid grid-2-3">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-head-title">
+          <h3>Monthly churn rate</h3>
+          <p class="card-head-sub">Customers active prior month, lost in current month, as % of prior month base.</p>
+        </div>
+        <div class="card-head-meta">
+          <div class="stat-label" style="text-align:right">Apr '26</div>
+          <div class="stat-value" style="color:var(--orange);font-size:22px">11.31%</div>
+        </div>
+      </div>
+      <div class="chart-area" style="height:240px"><svg id="chart-churn"></svg></div>
+      <div class="card-foot">
+        From <span style="color:var(--text)">0.65%</span> in Oct '25 to <span style="color:var(--orange)">11.31%</span> in Apr '26 — a 17× lift over six months.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-head-title">
+          <h3>Free-trial cohort outcome</h3>
+          <p class="card-head-sub">1,125 customers · started Feb–Jun 2025 · 12-month free trial, now expiring on a rolling basis.</p>
+        </div>
+        <div class="card-head-meta">
+          <div class="stats-row">
+            <div class="stat">
+              <div class="stat-label">Converted</div>
+              <div class="stat-value" style="color:var(--orange)">45.4%</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">On trial</div>
+              <div class="stat-value" style="color:var(--gray-700)">29.8%</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Churned</div>
+              <div class="stat-value" style="color:var(--black)">24.8%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="chart-area" style="height:240px"><svg id="chart-ftc"></svg></div>
+      <div class="card-foot">
+        Converted + on-trial + churned = 100%. The <span style="color:var(--gray-700)">29.8% still on trial</span> are mostly May–Jun '25 customers who haven't reached their cliff yet; once they do, this share redistributes into converted and churned. Through Dec '25 the cohort sat at 99% retention while still on free trial; the cliff at month 12 has so far produced <span style="color:var(--orange)">511 conversions to paid</span> and <span style="color:var(--black)">279 churns</span>.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 05 Cohort Retention Heatmap ===== -->
+<section class="section">
+  <div class="sec-label">
+    <span class="sec-num">06</span>
+    <span class="sec-title">Cohort retention</span>
+    <span class="sec-rule"></span>
+  </div>
+  <div class="card card-clip">
+    <div class="card-head">
+      <div class="card-head-title">
+        <h3>% of each sign-up cohort still active in subsequent months</h3>
+        <p class="card-head-sub">Rows are sign-up months; columns are months since sign-up. Highlighted rows (Feb–Jun '25) are the free 12-month trial cohorts — the cliff is in M11–M12.</p>
+      </div>
+    </div>
+    <div class="heatmap-wrap">
+      <div class="heatmap-legend">
+        <span>Retention</span>
+        <span class="heatmap-legend-item"><span class="heatmap-legend-swatch" style="background:#e7e5e4"></span>&lt;40%</span>
+        <span class="heatmap-legend-item"><span class="heatmap-legend-swatch" style="background:#fdba74"></span>40–60%</span>
+        <span class="heatmap-legend-item"><span class="heatmap-legend-swatch" style="background:#fb923c"></span>60–75%</span>
+        <span class="heatmap-legend-item"><span class="heatmap-legend-swatch" style="background:#ea580c"></span>75–85%</span>
+        <span class="heatmap-legend-item"><span class="heatmap-legend-swatch" style="background:#c2410c"></span>85–95%</span>
+        <span class="heatmap-legend-item"><span class="heatmap-legend-swatch" style="background:#9a3412"></span>95%+</span>
+        <span id="cohort-hover"></span>
+      </div>
+      <div id="heatmap"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 06 Revenue + Net Adds ===== -->
+<section class="section">
+  <div class="sec-label">
+    <span class="sec-num">07</span>
+    <span class="sec-title">Revenue & net adds</span>
+    <span class="sec-rule"></span>
+  </div>
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-head-title">
+          <h3>Revenue & ARPU</h3>
+          <p class="card-head-sub">Monthly revenue (left axis, area) and ARPU (right axis, line).</p>
+        </div>
+      </div>
+      <div class="chart-area" style="height:240px"><svg id="chart-revenue"></svg></div>
+      <div class="card-foot">
+        <strong style="color:var(--text);font-weight:500">Why isn't Apr revenue 4,221 × $23 = $97k?</strong> 4,249 paid orders ran in April, of which <span style="color:var(--text)">128 had $0 gross revenue</span> (comped continuations from a "paid" subscription type). The other 4,121 hit the $23 list price. 28 customers had two orders in the month (billing-cycle overlap). Net: <span style="color:var(--text)">mean $22.31 per order</span> · ARPU $19.35 across the full active base.
+      </div>
+      <div class="stats-foot">
+        <div>
+          <div class="stats-foot-cell-label">ARPU Oct '25</div>
+          <div class="stats-foot-cell-value" style="color:var(--text)">$6.20</div>
+        </div>
+        <div>
+          <div class="stats-foot-cell-label">ARPU Apr '26</div>
+          <div class="stats-foot-cell-value" style="color:var(--gray-700)">$19.35</div>
+        </div>
+        <div>
+          <div class="stats-foot-cell-label">6-month lift</div>
+          <div class="stats-foot-cell-value" style="color:var(--orange)">3.1×</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-head-title">
+          <h3>Net adds: new vs churned</h3>
+          <p class="card-head-sub">New customers added (above zero) versus customers churned (below zero).</p>
+        </div>
+      </div>
+      <div class="chart-area" style="height:240px"><svg id="chart-net"></svg></div>
+      <div class="card-foot">
+        Mar '26 net adds were +199 (559 new − 360 churned). Apr '26 turned negative: <span style="color:var(--orange)">−110 net</span>. Outflow is the constraint, not acquisition.
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span class="mono">Source · Subscription_Orders__All_.xlsx · 41,753 orders · 6,329 customers</span>
+  <span>Apr '26 figures reflect data through Apr 29, 2026 — month is incomplete.</span>
+</footer>
+
+</div>
+</main>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+const DATA = {"monthly":[{"month":"2025-01","active":1,"paid":0,"trial":1,"revenue":0,"new_subs":1,"churned":0,"churn_rate":0,"arpu":0},{"month":"2025-02","active":154,"paid":6,"trial":148,"revenue":138,"new_subs":153,"churned":0,"churn_rate":0,"arpu":0.9},{"month":"2025-03","active":213,"paid":25,"trial":188,"revenue":552,"new_subs":60,"churned":1,"churn_rate":0.65,"arpu":2.59},{"month":"2025-04","active":767,"paid":249,"trial":518,"revenue":5242.8,"new_subs":554,"churned":0,"churn_rate":0,"arpu":6.84},{"month":"2025-05","active":1225,"paid":450,"trial":776,"revenue":9546.51,"new_subs":469,"churned":11,"churn_rate":1.43,"arpu":7.79},{"month":"2025-06","active":1991,"paid":866,"trial":1125,"revenue":18612.47,"new_subs":787,"churned":25,"churn_rate":2.04,"arpu":9.35},{"month":"2025-07","active":2155,"paid":960,"trial":1195,"revenue":20897.11,"new_subs":197,"churned":39,"churn_rate":1.96,"arpu":9.7},{"month":"2025-08","active":2635,"paid":1373,"trial":1263,"revenue":30026.82,"new_subs":487,"churned":18,"churn_rate":0.84,"arpu":11.4},{"month":"2025-09","active":2766,"paid":1506,"trial":1262,"revenue":18210.24,"new_subs":143,"churned":28,"churn_rate":1.06,"arpu":6.58},{"month":"2025-10","active":2945,"paid":1642,"trial":1304,"revenue":18255.87,"new_subs":184,"churned":18,"churn_rate":0.65,"arpu":6.2},{"month":"2025-11","active":3430,"paid":1865,"trial":1566,"revenue":35826.28,"new_subs":558,"churned":80,"churn_rate":2.72,"arpu":10.44},{"month":"2025-12","active":4195,"paid":2657,"trial":1561,"revenue":58316.68,"new_subs":920,"churned":179,"churn_rate":5.22,"arpu":13.9},{"month":"2026-01","active":4444,"paid":2986,"trial":1466,"revenue":65320,"new_subs":435,"churned":242,"churn_rate":5.77,"arpu":14.7},{"month":"2026-02","active":4609,"paid":3212,"trial":1408,"revenue":70400.24,"new_subs":374,"churned":291,"churn_rate":6.55,"arpu":15.27},{"month":"2026-03","active":4934,"paid":3876,"trial":1131,"revenue":85767,"new_subs":559,"churned":360,"churn_rate":7.81,"arpu":17.38},{"month":"2026-04","active":4900,"paid":4221,"trial":804,"revenue":94806,"new_subs":448,"churned":558,"churn_rate":11.31,"arpu":19.35}],"free_trial_cohort":{"total":1125,"by_month":[{"month":"2025-01","paid":0,"trial":0,"active":0},{"month":"2025-02","paid":0,"trial":134,"active":134},{"month":"2025-03","paid":0,"trial":187,"active":187},{"month":"2025-04","paid":0,"trial":513,"active":513},{"month":"2025-05","paid":0,"trial":770,"active":770},{"month":"2025-06","paid":0,"trial":1121,"active":1121},{"month":"2025-07","paid":0,"trial":1120,"active":1120},{"month":"2025-08","paid":0,"trial":1119,"active":1119},{"month":"2025-09","paid":1,"trial":1117,"active":1117},{"month":"2025-10","paid":0,"trial":1117,"active":1117},{"month":"2025-11","paid":0,"trial":1118,"active":1118},{"month":"2025-12","paid":0,"trial":1117,"active":1117},{"month":"2026-01","paid":106,"trial":988,"active":1094},{"month":"2026-02","paid":134,"trial":933,"active":1067},{"month":"2026-03","paid":382,"trial":605,"active":987},{"month":"2026-04","paid":511,"trial":335,"active":846}]},"cohort_matrix":[{"cohort":"2025-02","size":134,"months":[{"offset":0,"pct":100},{"offset":1,"pct":99.3},{"offset":2,"pct":99.3},{"offset":3,"pct":99.3},{"offset":4,"pct":99.3},{"offset":5,"pct":98.5},{"offset":6,"pct":98.5},{"offset":7,"pct":98.5},{"offset":8,"pct":99.3},{"offset":9,"pct":99.3},{"offset":10,"pct":99.3},{"offset":11,"pct":80.6},{"offset":12,"pct":71.6},{"offset":13,"pct":72.4},{"offset":14,"pct":65.7}]},{"cohort":"2025-03","size":54,"months":[{"offset":0,"pct":100},{"offset":1,"pct":100},{"offset":2,"pct":98.1},{"offset":3,"pct":100},{"offset":4,"pct":100},{"offset":5,"pct":100},{"offset":6,"pct":100},{"offset":7,"pct":98.1},{"offset":8,"pct":100},{"offset":9,"pct":100},{"offset":10,"pct":100},{"offset":11,"pct":75.9},{"offset":12,"pct":72.2},{"offset":13,"pct":66.7}]},{"cohort":"2025-04","size":326,"months":[{"offset":0,"pct":100},{"offset":1,"pct":99.4},{"offset":2,"pct":99.4},{"offset":3,"pct":99.4},{"offset":4,"pct":99.4},{"offset":5,"pct":99.4},{"offset":6,"pct":99.4},{"offset":7,"pct":99.4},{"offset":8,"pct":99.4},{"offset":9,"pct":99.4},{"offset":10,"pct":99.4},{"offset":11,"pct":76.4},{"offset":12,"pct":65}]},{"cohort":"2025-05","size":260,"months":[{"offset":0,"pct":100},{"offset":1,"pct":99.6},{"offset":2,"pct":100},{"offset":3,"pct":100},{"offset":4,"pct":99.6},{"offset":5,"pct":99.6},{"offset":6,"pct":100},{"offset":7,"pct":100},{"offset":8,"pct":100},{"offset":9,"pct":99.2},{"offset":10,"pct":98.1},{"offset":11,"pct":68.8}]},{"cohort":"2025-06","size":351,"months":[{"offset":0,"pct":100},{"offset":1,"pct":99.7},{"offset":2,"pct":99.4},{"offset":3,"pct":99.1},{"offset":4,"pct":99.1},{"offset":5,"pct":98.9},{"offset":6,"pct":98.6},{"offset":7,"pct":99.1},{"offset":8,"pct":99.1},{"offset":9,"pct":98.9},{"offset":10,"pct":94.3}]},{"cohort":"2025-07","size":197,"months":[{"offset":0,"pct":100},{"offset":1,"pct":97.5},{"offset":2,"pct":97},{"offset":3,"pct":98},{"offset":4,"pct":95.9},{"offset":5,"pct":93.4},{"offset":6,"pct":93.4},{"offset":7,"pct":92.9},{"offset":8,"pct":91.4},{"offset":9,"pct":88.3}]},{"cohort":"2025-08","size":487,"months":[{"offset":0,"pct":100},{"offset":1,"pct":99},{"offset":2,"pct":98.6},{"offset":3,"pct":97.5},{"offset":4,"pct":93.6},{"offset":5,"pct":92},{"offset":6,"pct":90.3},{"offset":7,"pct":89.1},{"offset":8,"pct":85.4}]},{"cohort":"2025-09","size":143,"months":[{"offset":0,"pct":100},{"offset":1,"pct":95.8},{"offset":2,"pct":83.2},{"offset":3,"pct":79.7},{"offset":4,"pct":78.3},{"offset":5,"pct":77.6},{"offset":6,"pct":76.2},{"offset":7,"pct":70.6}]},{"cohort":"2025-10","size":184,"months":[{"offset":0,"pct":100},{"offset":1,"pct":85.9},{"offset":2,"pct":91.8},{"offset":3,"pct":90.2},{"offset":4,"pct":89.1},{"offset":5,"pct":87},{"offset":6,"pct":86.4}]},{"cohort":"2025-11","size":558,"months":[{"offset":0,"pct":100},{"offset":1,"pct":77.8},{"offset":2,"pct":80.8},{"offset":3,"pct":79.9},{"offset":4,"pct":79.2},{"offset":5,"pct":75.8}]},{"cohort":"2025-12","size":920,"months":[{"offset":0,"pct":100},{"offset":1,"pct":82.5},{"offset":2,"pct":84.3},{"offset":3,"pct":80.1},{"offset":4,"pct":77.7}]},{"cohort":"2026-01","size":435,"months":[{"offset":0,"pct":100},{"offset":1,"pct":58.6},{"offset":2,"pct":68.7},{"offset":3,"pct":63.9}]},{"cohort":"2026-02","size":374,"months":[{"offset":0,"pct":100},{"offset":1,"pct":67.4},{"offset":2,"pct":66.6}]},{"cohort":"2026-03","size":559,"months":[{"offset":0,"pct":100},{"offset":1,"pct":71.4}]},{"cohort":"2026-04","size":448,"months":[{"offset":0,"pct":100}]}],"kpis":{"current_month":"2026-04","active_subs":4900,"paid_subs":4221,"trial_subs":804,"mrr":94806,"churn_rate":11.31,"churned":558,"new_subs":448,"arpu":19.35,"total_unique_customers":6329,"mom_active_change":-0.7,"mom_revenue_change":10.5,"mom_churn_change":3.5}};
+
+// Compute cumulative
+let cumSum = 0;
+DATA.monthly.forEach(d => { cumSum += d.new_subs; d.cumulative = cumSum; d.lost = d.cumulative - d.active; });
+
+const C = {
+  orange: '#ea580c', orangeSoft: '#fb923c', orangeTint: '#fef0e6', orangePale: '#fff4ec',
+  black: '#18181b', gray700: '#44403c', gray500: '#78716c', gray400: '#a8a29e', gray300: '#d6d3d1', gray100: '#f5f5f4',
+  border: '#e7e5e4', borderStrong: '#d6d3d1', textMute: '#57534e', textDim: '#a8a29e'
+};
+const MONTHS = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const fmtMonth = m => { const [y, mo] = m.split('-'); return MONTHS[+mo] + " '" + y.slice(2); };
+const fmt = n => Math.abs(n) >= 1000 ? (n/1000).toFixed(1)+'k' : (n||0).toLocaleString();
+const fmtFull = n => (n||0).toLocaleString();
+
+// ===== Tooltip =====
+const tooltip = document.getElementById('tooltip');
+function showTooltip(e, html) {
+  tooltip.innerHTML = html;
+  tooltip.classList.add('visible');
+  positionTooltip(e);
+}
+function positionTooltip(e) {
+  const w = tooltip.offsetWidth;
+  const h = tooltip.offsetHeight;
+  let x = e.clientX + 14, y = e.clientY + 14;
+  if (x + w > window.innerWidth - 12) x = e.clientX - w - 14;
+  if (y + h > window.innerHeight - 12) y = e.clientY - h - 14;
+  tooltip.style.left = x + 'px';
+  tooltip.style.top = y + 'px';
+}
+function hideTooltip() { tooltip.classList.remove('visible'); }
+
+// ===== Crosshair / hover system =====
+function attachCrosshair(svg, cfg) {
+  // cfg: { x0, y0, w, h, data, getTooltipHtml, getDots? }
+  const overlay = svg.querySelector('.hover-overlay');
+  const crosshair = svg.querySelector('.crosshair');
+  const dotsLayer = svg.querySelector('.hover-dots');
+  if (!overlay) return;
+  const { x0, y0, w, h, data, getTooltipHtml, getDots } = cfg;
+  const cellW = w / data.length;
+
+  overlay.addEventListener('mousemove', e => {
+    const rect = svg.getBoundingClientRect();
+    const vbW = svg.viewBox.baseVal.width || rect.width;
+    const vbX = (e.clientX - rect.left) * (vbW / rect.width);
+    let i = Math.round((vbX - x0 - cellW/2) / cellW);
+    i = Math.max(0, Math.min(data.length - 1, i));
+    const tx = x0 + (i + 0.5) * cellW;
+    if (crosshair) {
+      crosshair.setAttribute('x1', tx);
+      crosshair.setAttribute('x2', tx);
+      crosshair.setAttribute('opacity', '0.45');
+    }
+    if (dotsLayer && getDots) {
+      dotsLayer.innerHTML = getDots(i, tx).map(d =>
+        `<circle cx="${d.x}" cy="${d.y}" r="4.5" fill="${d.color}" stroke="#ffffff" stroke-width="2"/>`
+      ).join('');
+    }
+    showTooltip(e, getTooltipHtml(data[i], i));
+  });
+  overlay.addEventListener('mouseleave', () => {
+    if (crosshair) crosshair.setAttribute('opacity', '0');
+    if (dotsLayer) dotsLayer.innerHTML = '';
+    hideTooltip();
+  });
+}
+
+// ===== KPIs =====
+function renderKpis() {
+  const k = DATA.kpis;
+  const kpis = [
+    {label:'Active subscribers', value:fmt(k.active_subs), sub:`${k.paid_subs.toLocaleString()} paid · ${k.trial_subs.toLocaleString()} trial`, trend:k.mom_active_change, key:'active', color:C.gray700},
+    {label:'Monthly revenue', value:'$'+(k.mrr/1000).toFixed(1)+'k', sub:`MoM ${k.mom_revenue_change>0?'+':''}${k.mom_revenue_change}%`, trend:k.mom_revenue_change, key:'revenue', color:C.orange},
+    {label:'Churn rate · Apr \'26', value:k.churn_rate.toFixed(2)+'%', sub:`${k.churned} customers · current month`, trend:k.mom_churn_change, key:'churn_rate', color:C.orange},
+    {label:'ARPU', value:'$'+k.arpu.toFixed(2), sub:'Per active subscriber', key:'arpu', color:C.gray500},
+    {label:'New subscribers', value:fmt(k.new_subs), sub:'First-touch this month', key:'new_subs', color:C.gray500},
+  ];
+
+  const grid = document.getElementById('kpi-grid');
+  grid.innerHTML = kpis.map(kpi => {
+    const trendColor = kpi.trend === undefined ? C.textMute : kpi.trend > 0 ? C.gray700 : kpi.trend < 0 ? C.orange : C.textMute;
+    const trendArrow = kpi.trend > 0 ? '▲' : kpi.trend < 0 ? '▼' : '—';
+    const sp = sparkLine(DATA.monthly.map(d => d[kpi.key]));
+    const sparkId = 'sg-' + kpi.key;
+    return `
+      <div class="card kpi">
+        <div class="kpi-head">
+          <div class="kpi-label">${kpi.label}</div>
+          ${kpi.trend !== undefined ? `<div class="kpi-trend" style="color:${trendColor}">${trendArrow} ${Math.abs(kpi.trend).toFixed(1)}%</div>` : ''}
+        </div>
+        <div class="kpi-value">${kpi.value}</div>
+        <div class="kpi-sub">${kpi.sub}</div>
+        <div class="kpi-spark">
+          <svg viewBox="0 0 100 26" preserveAspectRatio="none" style="width:100%;height:100%">
+            <defs><linearGradient id="${sparkId}" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="${kpi.color}" stop-opacity="0.28"/>
+              <stop offset="100%" stop-color="${kpi.color}" stop-opacity="0"/>
+            </linearGradient></defs>
+            <path d="${sp.area}" fill="url(#${sparkId})"/>
+            <path d="${sp.line}" fill="none" stroke="${kpi.color}" stroke-width="1.5"/>
+          </svg>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function sparkLine(values) {
+  const max = Math.max(...values, 1), min = Math.min(...values, 0);
+  const range = max - min || 1;
+  const W = 100, H = 26;
+  const points = values.map((v, i) => [(i / (values.length - 1)) * W, H - ((v - min) / range) * (H - 2) - 1]);
+  const line = points.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(2) + ' ' + p[1].toFixed(2)).join(' ');
+  const area = line + ` L${W} ${H} L0 ${H} Z`;
+  return { line, area };
+}
+
+// ===== Helpers =====
+function yAxis(x0, y0, w, h, yMax, yTicks, fmtFn, color) {
+  let g = '';
+  for (let i = 0; i <= yTicks; i++) {
+    const v = (yMax / yTicks) * i;
+    const y = y0 + h - (v / yMax) * h;
+    g += `<line class="grid-line" x1="${x0}" y1="${y}" x2="${x0+w}" y2="${y}"/>`;
+    g += `<text class="axis-text" x="${x0-8}" y="${y+3}" text-anchor="end"${color ? ' fill="'+color+'"' : ''}>${fmtFn(v)}</text>`;
+  }
+  return g;
+}
+function rightAxis(x0, y0, w, h, yMax, yTicks, fmtFn, color) {
+  let g = '';
+  for (let i = 0; i <= yTicks; i++) {
+    const v = (yMax / yTicks) * i;
+    const y = y0 + h - (v / yMax) * h;
+    g += `<text class="axis-text" x="${x0+w+8}" y="${y+3}" text-anchor="start"${color ? ' fill="'+color+'"' : ''}>${fmtFn(v)}</text>`;
+  }
+  return g;
+}
+function xAxisLabels(x0, y0, w, h, data, every=2) {
+  let g = '';
+  const cellW = w / data.length;
+  data.forEach((d, i) => {
+    if (i % every !== 0 && i !== data.length - 1) return;
+    const x = x0 + (i + 0.5) * cellW;
+    g += `<text class="axis-text" x="${x}" y="${y0+h+16}" text-anchor="middle">${fmtMonth(d.month)}</text>`;
+  });
+  return g;
+}
+
+// ===== 01 Composition =====
+let compositionView = 'absolute';
+function setView(v) {
+  compositionView = v;
+  document.querySelectorAll('.toggle button').forEach(b => b.classList.toggle('active', b.dataset.view === v));
+  drawComposition();
+}
+
+function drawComposition() {
+  const svg = document.getElementById('chart-composition');
+  const W = svg.parentElement.clientWidth;
+  const H = 340;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const margin = { top: 40, right: 52, bottom: 32, left: 50 };
+  const x0 = margin.left, y0 = margin.top;
+  const w = W - margin.left - margin.right;
+  const h = H - margin.top - margin.bottom;
+  const data = DATA.monthly;
+
+  const isPct = compositionView === 'percent';
+  const yMax = isPct ? 1 : Math.ceil(Math.max(...data.map(d => d.active)) / 1000) * 1000;
+  const churnMax = 12;
+  const cellW = w / data.length;
+  const barW = cellW * 0.66;
+
+  let html = '';
+  html += yAxis(x0, y0, w, h, yMax, 4, isPct ? v => Math.round(v*100)+'%' : v => fmt(v));
+  if (!isPct) html += rightAxis(x0, y0, w, h, churnMax, 4, v => v + '%', C.black);
+  html += xAxisLabels(x0, y0, w, h, data);
+
+  // Bars
+  data.forEach((d, i) => {
+    const x = x0 + (i + 0.5) * cellW - barW / 2;
+    const paidH = isPct ? (d.paid / d.active) * h : (d.paid / yMax) * h;
+    const trialH = isPct ? (d.trial / d.active) * h : (d.trial / yMax) * h;
+    const yPaid = y0 + h - paidH;
+    const yTrial = yPaid - trialH;
+    html += `<rect x="${x}" y="${yPaid}" width="${barW}" height="${paidH}" fill="${C.orange}"/>`;
+    html += `<rect x="${x}" y="${yTrial}" width="${barW}" height="${trialH}" fill="${C.gray300}"/>`;
+  });
+
+  // Churn line (absolute only)
+  if (!isPct) {
+    let path = '';
+    data.forEach((d, i) => {
+      const x = x0 + (i + 0.5) * cellW;
+      const y = y0 + h - (d.churn_rate / churnMax) * h;
+      path += (i ? 'L' : 'M') + x + ' ' + y + ' ';
+    });
+    html += `<path d="${path}" fill="none" stroke="${C.black}" stroke-width="1.6"/>`;
+    data.forEach((d, i) => {
+      const x = x0 + (i + 0.5) * cellW;
+      const y = y0 + h - (d.churn_rate / churnMax) * h;
+      html += `<circle cx="${x}" cy="${y}" r="2.5" fill="${C.black}"/>`;
+    });
+  }
+
+  // Reference lines
+  const trialIdx = data.findIndex(d => d.month === '2026-01');
+  const paywallIdx = data.findIndex(d => d.month === '2026-04');
+  const trialX = x0 + (trialIdx + 0.5) * cellW;
+  const paywallX = x0 + (paywallIdx + 0.5) * cellW;
+  html += `<line class="ref-line" x1="${trialX}" y1="${y0-6}" x2="${trialX}" y2="${y0+h}" stroke="${C.orange}"/>`;
+  html += `<text class="ref-label" x="${trialX}" y="${y0-22}" text-anchor="middle" fill="${C.orange}">Trial wave</text>`;
+  html += `<line class="ref-line" x1="${paywallX}" y1="${y0-6}" x2="${paywallX}" y2="${y0+h}" stroke="${C.black}"/>`;
+  html += `<text class="ref-label" x="${paywallX}" y="${y0-22}" text-anchor="end" fill="${C.black}">Paywall</text>`;
+
+  // Crosshair + overlay
+  html += `<line class="crosshair" y1="${y0}" y2="${y0+h}"/>`;
+  html += `<g class="hover-dots"></g>`;
+  html += `<rect class="hover-overlay" x="${x0}" y="${y0-30}" width="${w}" height="${h+30}"/>`;
+
+  svg.innerHTML = html;
+
+  attachCrosshair(svg, {
+    x0, y0, w, h, data,
+    getTooltipHtml: (d) => `<div class="tooltip-month">${fmtMonth(d.month)}</div>
+      <div class="tooltip-row"><span class="swatch" style="background:${C.orange}"></span><span class="label">Paid</span><span class="val">${d.paid.toLocaleString()}</span></div>
+      <div class="tooltip-row"><span class="swatch" style="background:${C.gray300}"></span><span class="label">Trial</span><span class="val">${d.trial.toLocaleString()}</span></div>
+      <div class="tooltip-row"><span class="swatch" style="background:${C.borderStrong}"></span><span class="label">Total active</span><span class="val">${d.active.toLocaleString()}</span></div>
+      <div class="tooltip-row"><span class="swatch" style="background:${C.black}"></span><span class="label">Churn rate</span><span class="val">${d.churn_rate}%</span></div>`,
+    getDots: !isPct ? (i, tx) => {
+      const d = data[i];
+      const churnY = y0 + h - (d.churn_rate / churnMax) * h;
+      return [{ x: tx, y: churnY, color: C.black }];
+    } : null
+  });
+}
+
+// ===== 02 Cumulative vs Active =====
+function drawCumulative() {
+  const svg = document.getElementById('chart-cumulative');
+  const W = svg.parentElement.clientWidth;
+  const H = 340;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const margin = { top: 36, right: 28, bottom: 32, left: 56 };
+  const x0 = margin.left, y0 = margin.top;
+  const w = W - margin.left - margin.right;
+  const h = H - margin.top - margin.bottom;
+  const data = DATA.monthly;
+  const yMax = Math.ceil(Math.max(...data.map(d => d.cumulative)) / 1000) * 1000;
+  const cellW = w / data.length;
+
+  let html = '';
+  html += yAxis(x0, y0, w, h, yMax, 5, v => fmt(v));
+  html += xAxisLabels(x0, y0, w, h, data);
+
+  // Build paths
+  const xAt = i => x0 + (i / (data.length - 1)) * w;
+  const yAt = v => y0 + h - (v / yMax) * h;
+
+  // Gap area (between cumulative and active)
+  let gapPath = `M${xAt(0)} ${yAt(data[0].cumulative)}`;
+  for (let i = 1; i < data.length; i++) gapPath += ` L${xAt(i)} ${yAt(data[i].cumulative)}`;
+  for (let i = data.length - 1; i >= 0; i--) gapPath += ` L${xAt(i)} ${yAt(data[i].active)}`;
+  gapPath += ' Z';
+  html += `<path d="${gapPath}" fill="${C.orangeTint}" stroke="${C.orangeSoft}" stroke-width="0" opacity="0.7"/>`;
+
+  // Cumulative line
+  let cumPath = '';
+  data.forEach((d, i) => { cumPath += (i ? 'L' : 'M') + xAt(i) + ' ' + yAt(d.cumulative) + ' '; });
+  html += `<path d="${cumPath}" fill="none" stroke="${C.gray700}" stroke-width="2"/>`;
+
+  // Active line
+  let actPath = '';
+  data.forEach((d, i) => { actPath += (i ? 'L' : 'M') + xAt(i) + ' ' + yAt(d.active) + ' '; });
+  html += `<path d="${actPath}" fill="none" stroke="${C.black}" stroke-width="2"/>`;
+
+  // Reference lines
+  const trialIdx = data.findIndex(d => d.month === '2026-01');
+  const paywallIdx = data.findIndex(d => d.month === '2026-04');
+  const trialX = xAt(trialIdx);
+  const paywallX = xAt(paywallIdx);
+  html += `<line class="ref-line" x1="${trialX}" y1="${y0}" x2="${trialX}" y2="${y0+h}" stroke="${C.orange}" opacity="0.6"/>`;
+  html += `<text class="ref-label" x="${trialX}" y="${y0-12}" text-anchor="middle" fill="${C.orange}">Trial wave</text>`;
+  html += `<line class="ref-line" x1="${paywallX}" y1="${y0}" x2="${paywallX}" y2="${y0+h}" stroke="${C.black}" opacity="0.6"/>`;
+  html += `<text class="ref-label" x="${paywallX}" y="${y0-12}" text-anchor="end" fill="${C.black}">Paywall</text>`;
+
+  // End-point labels
+  const lastIdx = data.length - 1;
+  const endCumX = xAt(lastIdx), endCumY = yAt(data[lastIdx].cumulative);
+  const endActX = xAt(lastIdx), endActY = yAt(data[lastIdx].active);
+  html += `<circle cx="${endCumX}" cy="${endCumY}" r="3" fill="${C.gray700}"/>`;
+  html += `<circle cx="${endActX}" cy="${endActY}" r="3" fill="${C.black}"/>`;
+
+  // Crosshair + overlay
+  html += `<line class="crosshair" y1="${y0}" y2="${y0+h}"/>`;
+  html += `<g class="hover-dots"></g>`;
+  html += `<rect class="hover-overlay" x="${x0}" y="${y0}" width="${w}" height="${h}"/>`;
+
+  svg.innerHTML = html;
+
+  // Custom crosshair: index based on x along line (data points evenly distributed)
+  const overlay = svg.querySelector('.hover-overlay');
+  const crosshair = svg.querySelector('.crosshair');
+  const dotsLayer = svg.querySelector('.hover-dots');
+  overlay.addEventListener('mousemove', e => {
+    const rect = svg.getBoundingClientRect();
+    const vbW = svg.viewBox.baseVal.width || rect.width;
+    const vbX = (e.clientX - rect.left) * (vbW / rect.width);
+    const i = Math.max(0, Math.min(data.length - 1, Math.round((vbX - x0) / w * (data.length - 1))));
+    const tx = xAt(i);
+    crosshair.setAttribute('x1', tx); crosshair.setAttribute('x2', tx); crosshair.setAttribute('opacity', '0.45');
+    dotsLayer.innerHTML = `
+      <circle cx="${tx}" cy="${yAt(data[i].cumulative)}" r="4.5" fill="${C.gray700}" stroke="#ffffff" stroke-width="2"/>
+      <circle cx="${tx}" cy="${yAt(data[i].active)}" r="4.5" fill="${C.black}" stroke="#ffffff" stroke-width="2"/>`;
+    const d = data[i];
+    showTooltip(e, `<div class="tooltip-month">${fmtMonth(d.month)}</div>
+      <div class="tooltip-row"><span class="swatch" style="background:${C.gray700}"></span><span class="label">Acquired</span><span class="val">${d.cumulative.toLocaleString()}</span></div>
+      <div class="tooltip-row"><span class="swatch" style="background:${C.black}"></span><span class="label">Active</span><span class="val">${d.active.toLocaleString()}</span></div>
+      <div class="tooltip-row"><span class="swatch" style="background:${C.orangeSoft}"></span><span class="label">Lost</span><span class="val">${d.lost.toLocaleString()}</span></div>`);
+  });
+  overlay.addEventListener('mouseleave', () => {
+    crosshair.setAttribute('opacity', '0');
+    dotsLayer.innerHTML = '';
+    hideTooltip();
+  });
+}
+
+// ===== 04a Monthly Churn =====
+function drawChurn() {
+  const svg = document.getElementById('chart-churn');
+  const W = svg.parentElement.clientWidth;
+  const H = 240;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const margin = { top: 18, right: 16, bottom: 30, left: 40 };
+  const x0 = margin.left, y0 = margin.top;
+  const w = W - margin.left - margin.right;
+  const h = H - margin.top - margin.bottom;
+  const data = DATA.monthly.slice(2);
+  const yMax = 12;
+  const cellW = w / data.length;
+  const barW = cellW * 0.7;
+
+  let html = yAxis(x0, y0, w, h, yMax, 4, v => v + '%');
+  html += xAxisLabels(x0, y0, w, h, data, 2);
+
+  data.forEach((d, i) => {
+    const x = x0 + (i + 0.5) * cellW - barW / 2;
+    const barH = (d.churn_rate / yMax) * h;
+    const fill = d.churn_rate >= 7 ? C.orange : d.churn_rate >= 4 ? C.orangeSoft : C.gray300;
+    html += `<rect x="${x}" y="${y0 + h - barH}" width="${barW}" height="${barH}" fill="${fill}" rx="1.5"/>`;
+  });
+
+  html += `<line class="crosshair" y1="${y0}" y2="${y0+h}"/>`;
+  html += `<g class="hover-dots"></g>`;
+  html += `<rect class="hover-overlay" x="${x0}" y="${y0}" width="${w}" height="${h}"/>`;
+
+  svg.innerHTML = html;
+
+  attachCrosshair(svg, {
+    x0, y0, w, h, data,
+    getTooltipHtml: (d) => `<div class="tooltip-month">${fmtMonth(d.month)}</div>
+      <div class="tooltip-row"><span class="swatch" style="background:${C.orange}"></span><span class="label">Churn rate</span><span class="val">${d.churn_rate}%</span></div>
+      <div class="tooltip-row"><span class="swatch" style="background:transparent"></span><span class="label">Lost</span><span class="val">${d.churned}</span></div>`,
+  });
+}
+
+// ===== 04b Free Trial Cohort =====
+function drawFTC() {
+  const svg = document.getElementById('chart-ftc');
+  const W = svg.parentElement.clientWidth;
+  const H = 240;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const margin = { top: 28, right: 16, bottom: 30, left: 44 };
+  const x0 = margin.left, y0 = margin.top;
+  const w = W - margin.left - margin.right;
+  const h = H - margin.top - margin.bottom;
+  const data = DATA.free_trial_cohort.by_month;
+  const yMax = 1200;
+  const cellW = w / data.length;
+  const barW = cellW * 0.7;
+
+  let html = yAxis(x0, y0, w, h, yMax, 4, v => fmt(v));
+  html += xAxisLabels(x0, y0, w, h, data, 2);
+
+  data.forEach((d, i) => {
+    const x = x0 + (i + 0.5) * cellW - barW / 2;
+    const trialH = (d.trial / yMax) * h;
+    const paidH = (d.paid / yMax) * h;
+    const yT = y0 + h - trialH;
+    const yP = yT - paidH;
+    html += `<rect x="${x}" y="${yT}" width="${barW}" height="${trialH}" fill="${C.gray300}"/>`;
+    html += `<rect x="${x}" y="${yP}" width="${barW}" height="${paidH}" fill="${C.orange}"/>`;
+  });
+
+  // Cliff line
+  const cliffIdx = data.findIndex(d => d.month === '2026-01');
+  if (cliffIdx >= 0) {
+    const cx = x0 + (cliffIdx + 0.5) * cellW;
+    html += `<line class="ref-line" x1="${cx}" y1="${y0-4}" x2="${cx}" y2="${y0+h}" stroke="${C.orange}"/>`;
+    html += `<text class="ref-label" x="${cx-4}" y="${y0-10}" text-anchor="end" fill="${C.orange}">Cliff</text>`;
+  }
+
+  html += `<line class="crosshair" y1="${y0}" y2="${y0+h}"/>`;
+  html += `<g class="hover-dots"></g>`;
+  html += `<rect class="hover-overlay" x="${x0}" y="${y0-20}" width="${w}" height="${h+20}"/>`;
+
+  svg.innerHTML = html;
+
+  attachCrosshair(svg, {
+    x0, y0, w, h, data,
+    getTooltipHtml: (d) => `<div class="tooltip-month">${fmtMonth(d.month)}</div>
+      <div class="tooltip-row"><span class="swatch" style="background:${C.orange}"></span><span class="label">Converted to paid</span><span class="val">${d.paid}</span></div>
+      <div class="tooltip-row"><span class="swatch" style="background:${C.gray300}"></span><span class="label">Still on trial</span><span class="val">${d.trial}</span></div>
+      <div class="tooltip-row"><span class="swatch" style="background:transparent"></span><span class="label">Total active</span><span class="val">${d.active}</span></div>`,
+  });
+}
+
+// ===== 05 Cohort Heatmap =====
+function heatColor(pct) {
+  if (pct == null) return 'transparent';
+  if (pct >= 95) return '#9a3412';
+  if (pct >= 85) return '#c2410c';
+  if (pct >= 75) return '#ea580c';
+  if (pct >= 60) return '#fb923c';
+  if (pct >= 40) return '#fdba74';
+  return '#e7e5e4';
+}
+function heatText(pct) {
+  if (pct == null) return C.textDim;
+  if (pct >= 75) return '#ffffff';
+  if (pct >= 40) return '#0c0a09';
+  return C.textMute;
+}
+function offsetMonth(cohort, offset) {
+  const [y, mo] = cohort.split('-').map(Number);
+  const tot = mo + offset;
+  const ny = y + Math.floor((tot - 1) / 12);
+  const nm = ((tot - 1) % 12) + 1;
+  return ny + '-' + String(nm).padStart(2, '0');
+}
+function renderHeatmap() {
+  const cohorts = DATA.cohort_matrix;
+  const maxOffset = Math.max(...cohorts.map(c => Math.max(...c.months.map(m => m.offset))));
+  const ftCohorts = ['2025-02', '2025-03', '2025-04', '2025-05', '2025-06'];
+  let html = `<div class="heatmap-grid" style="grid-template-columns: 100px 50px repeat(${maxOffset + 1}, minmax(36px, 1fr))">`;
+  html += `<div class="heatmap-header">Cohort</div><div class="heatmap-header right">Size</div>`;
+  for (let i = 0; i <= maxOffset; i++) {
+    const cls = (i === 11 || i === 12) ? 'heatmap-header center accent' : 'heatmap-header center';
+    html += `<div class="${cls}">M${i}</div>`;
+  }
+  cohorts.forEach(c => {
+    const isFT = ftCohorts.includes(c.cohort);
+    html += `<div class="heatmap-row-label ${isFT ? 'ft' : ''}">${isFT ? '<span class="heatmap-ft-dot"></span>' : ''}${fmtMonth(c.cohort)}</div>`;
+    html += `<div class="heatmap-row-size">${c.size}</div>`;
+    for (let i = 0; i <= maxOffset; i++) {
+      const m = c.months.find(mm => mm.offset === i);
+      if (!m) { html += `<div></div>`; }
+      else {
+        const om = offsetMonth(c.cohort, i);
+        html += `<div class="heat-cell" style="background:${heatColor(m.pct)};color:${heatText(m.pct)}"
+          data-cohort="${fmtMonth(c.cohort)}" data-offset="${i}" data-month="${fmtMonth(om)}" data-pct="${m.pct}" data-size="${c.size}">${Math.round(m.pct)}</div>`;
+      }
+    }
+  });
+  html += `</div>`;
+  document.getElementById('heatmap').innerHTML = html;
+  document.querySelectorAll('.heat-cell').forEach(cell => {
+    cell.addEventListener('mouseenter', () => {
+      const c = cell.dataset, active = Math.round(parseFloat(c.pct) / 100 * parseInt(c.size));
+      document.getElementById('cohort-hover').textContent = `${c.cohort} cohort · M${c.offset} (${c.month}) · ${active} active · ${c.pct}%`;
+    });
+    cell.addEventListener('mouseleave', () => { document.getElementById('cohort-hover').textContent = ''; });
+  });
+}
+
+// ===== 06a Revenue + ARPU =====
+function drawRevenue() {
+  const svg = document.getElementById('chart-revenue');
+  const W = svg.parentElement.clientWidth;
+  const H = 240;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const margin = { top: 22, right: 48, bottom: 30, left: 50 };
+  const x0 = margin.left, y0 = margin.top;
+  const w = W - margin.left - margin.right;
+  const h = H - margin.top - margin.bottom;
+  const data = DATA.monthly;
+  const revMax = 100000;
+  const arpuMax = 25;
+
+  let html = yAxis(x0, y0, w, h, revMax, 4, v => '$' + (v/1000).toFixed(0) + 'k', C.orange);
+  html += rightAxis(x0, y0, w, h, arpuMax, 4, v => '$' + v, C.black);
+  html += xAxisLabels(x0, y0, w, h, data, 2);
+
+  const xAt = i => x0 + (i / (data.length - 1)) * w;
+  const yRev = v => y0 + h - (v / revMax) * h;
+  const yArpu = v => y0 + h - (v / arpuMax) * h;
+
+  // Revenue area
+  let aPath = `M${xAt(0)} ${y0 + h} L${xAt(0)} ${yRev(data[0].revenue)}`;
+  for (let i = 1; i < data.length; i++) aPath += ` L${xAt(i)} ${yRev(data[i].revenue)}`;
+  aPath += ` L${xAt(data.length - 1)} ${y0 + h} Z`;
+  html += `<defs><linearGradient id="revG" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="${C.orange}" stop-opacity="0.28"/>
+    <stop offset="100%" stop-color="${C.orange}" stop-opacity="0"/>
+  </linearGradient></defs>`;
+  html += `<path d="${aPath}" fill="url(#revG)"/>`;
+  let revLine = '';
+  data.forEach((d, i) => { revLine += (i ? 'L' : 'M') + xAt(i) + ' ' + yRev(d.revenue) + ' '; });
+  html += `<path d="${revLine}" fill="none" stroke="${C.orange}" stroke-width="2"/>`;
+
+  // ARPU line
+  let arpuLine = '';
+  data.forEach((d, i) => { arpuLine += (i ? 'L' : 'M') + xAt(i) + ' ' + yArpu(d.arpu) + ' '; });
+  html += `<path d="${arpuLine}" fill="none" stroke="${C.black}" stroke-width="1.5"/>`;
+  data.forEach((d, i) => { html += `<circle cx="${xAt(i)}" cy="${yArpu(d.arpu)}" r="2" fill="${C.black}"/>`; });
+
+  html += `<line class="crosshair" y1="${y0}" y2="${y0+h}"/>`;
+  html += `<g class="hover-dots"></g>`;
+  html += `<rect class="hover-overlay" x="${x0}" y="${y0}" width="${w}" height="${h}"/>`;
+
+  svg.innerHTML = html;
+
+  // Custom hover for line chart
+  const overlay = svg.querySelector('.hover-overlay');
+  const crosshair = svg.querySelector('.crosshair');
+  const dotsLayer = svg.querySelector('.hover-dots');
+  overlay.addEventListener('mousemove', e => {
+    const rect = svg.getBoundingClientRect();
+    const vbW = svg.viewBox.baseVal.width || rect.width;
+    const vbX = (e.clientX - rect.left) * (vbW / rect.width);
+    const i = Math.max(0, Math.min(data.length - 1, Math.round((vbX - x0) / w * (data.length - 1))));
+    const tx = xAt(i);
+    crosshair.setAttribute('x1', tx); crosshair.setAttribute('x2', tx); crosshair.setAttribute('opacity', '0.45');
+    const d = data[i];
+    dotsLayer.innerHTML = `
+      <circle cx="${tx}" cy="${yRev(d.revenue)}" r="4.5" fill="${C.orange}" stroke="#fff" stroke-width="2"/>
+      <circle cx="${tx}" cy="${yArpu(d.arpu)}" r="4.5" fill="${C.black}" stroke="#fff" stroke-width="2"/>`;
+    showTooltip(e, `<div class="tooltip-month">${fmtMonth(d.month)}</div>
+      <div class="tooltip-row"><span class="swatch" style="background:${C.orange}"></span><span class="label">Revenue</span><span class="val">$${d.revenue.toLocaleString()}</span></div>
+      <div class="tooltip-row"><span class="swatch" style="background:${C.black}"></span><span class="label">ARPU</span><span class="val">$${d.arpu}</span></div>`);
+  });
+  overlay.addEventListener('mouseleave', () => {
+    crosshair.setAttribute('opacity', '0'); dotsLayer.innerHTML = ''; hideTooltip();
+  });
+}
+
+// ===== 06b Net Adds =====
+function drawNet() {
+  const svg = document.getElementById('chart-net');
+  const W = svg.parentElement.clientWidth;
+  const H = 240;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const margin = { top: 22, right: 16, bottom: 30, left: 50 };
+  const x0 = margin.left, y0 = margin.top;
+  const w = W - margin.left - margin.right;
+  const h = H - margin.top - margin.bottom;
+  const data = DATA.monthly.slice(2);
+  const yMax = 1000;
+  const totalRange = 2 * yMax;
+  const cellW = w / data.length;
+  const barW = cellW * 0.7;
+  const yOf = v => y0 + h - ((v + yMax) / totalRange) * h;
+
+  let html = '';
+  [-1000, -500, 0, 500, 1000].forEach(t => {
+    const y = yOf(t);
+    html += `<line class="grid-line" x1="${x0}" y1="${y}" x2="${x0+w}" y2="${y}"/>`;
+    html += `<text class="axis-text" x="${x0-8}" y="${y+3}" text-anchor="end">${t}</text>`;
+  });
+  html += xAxisLabels(x0, y0, w, h, data, 2);
+
+  const yZ = yOf(0);
+  html += `<line x1="${x0}" y1="${yZ}" x2="${x0+w}" y2="${yZ}" stroke="${C.borderStrong}" stroke-width="1"/>`;
+
+  data.forEach((d, i) => {
+    const x = x0 + (i + 0.5) * cellW - barW / 2;
+    const newH = (d.new_subs / totalRange) * h;
+    const churnH = (d.churned / totalRange) * h;
+    html += `<rect x="${x}" y="${yZ - newH}" width="${barW}" height="${newH}" fill="${C.gray700}" rx="1.5"/>`;
+    html += `<rect x="${x}" y="${yZ}" width="${barW}" height="${churnH}" fill="${C.orange}" rx="1.5"/>`;
+  });
+
+  html += `<line class="crosshair" y1="${y0}" y2="${y0+h}"/>`;
+  html += `<g class="hover-dots"></g>`;
+  html += `<rect class="hover-overlay" x="${x0}" y="${y0}" width="${w}" height="${h}"/>`;
+
+  svg.innerHTML = html;
+
+  attachCrosshair(svg, {
+    x0, y0, w, h, data,
+    getTooltipHtml: (d) => {
+      const net = d.new_subs - d.churned;
+      return `<div class="tooltip-month">${fmtMonth(d.month)}</div>
+        <div class="tooltip-row"><span class="swatch" style="background:${C.gray700}"></span><span class="label">New</span><span class="val">+${d.new_subs}</span></div>
+        <div class="tooltip-row"><span class="swatch" style="background:${C.orange}"></span><span class="label">Churned</span><span class="val">−${d.churned}</span></div>
+        <div class="tooltip-row"><span class="swatch" style="background:transparent"></span><span class="label">Net</span><span class="val" style="color:${net>=0?C.gray700:C.orange}">${net>=0?'+':''}${net}</span></div>`;
+    }
+  });
+}
+
+// ===== Waterfall Table =====
+function renderWaterfall() {
+  const data = DATA.monthly;
+  const currentMonth = DATA.kpis.current_month;
+  const months = data.slice(1);
+
+  const headerCells = months.map(d =>
+    `<th class="${d.month === currentMonth ? 'current' : ''}">${fmtMonth(d.month)}</th>`
+  ).join('');
+
+  const buildRow = (label, sign, key, rowClass, fmtVal) => {
+    const cells = months.map(d => {
+      const idx = data.findIndex(r => r.month === d.month);
+      let val;
+      if (key === 'starting') val = idx > 0 ? data[idx - 1].active : 0;
+      else if (key === 'ending') val = d.active;
+      else if (key === 'new') val = d.new_subs;
+      else if (key === 'churned') val = d.churned;
+      else if (key === 'churnpct') val = d.churn_rate;
+      const isCurrent = d.month === currentMonth;
+      const isZero = val === 0;
+      const cls = `value ${isCurrent ? 'current' : ''} ${isZero ? 'zero' : ''}`.trim();
+      return `<td class="${cls}">${fmtVal(val)}</td>`;
+    }).join('');
+    return `<tr class="${rowClass}"><td class="metric-cell"><span class="sign">${sign}</span>${label}</td>${cells}</tr>`;
+  };
+
+  const html = `
+    <table class="waterfall">
+      <thead>
+        <tr>
+          <th class="metric-header">Metric</th>
+          ${headerCells}
+        </tr>
+      </thead>
+      <tbody>
+        ${buildRow('Starting subscribers', '', 'starting', 'row-starting', v => v.toLocaleString())}
+        ${buildRow('New subscribers', '+', 'new', 'row-new', v => v.toLocaleString())}
+        ${buildRow('Churned subscribers', '−', 'churned', 'row-churned', v => v.toLocaleString())}
+        ${buildRow('Ending subscribers', '=', 'ending', 'row-ending', v => v.toLocaleString())}
+        ${buildRow('Churn rate', '', 'churnpct', 'row-churnpct', v => v.toFixed(2) + '%')}
+      </tbody>
+    </table>`;
+  document.getElementById('waterfall-table').innerHTML = html;
+}
+
+// ===== 01 Upcoming Free-Trial Expirations =====
+function drawCliff() {
+  const svg = document.getElementById('chart-cliff');
+  const W = svg.parentElement.clientWidth;
+  const H = 360;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const margin = { top: 56, right: 24, bottom: 56, left: 50 };
+  const x0 = margin.left, y0 = margin.top;
+  const w = W - margin.left - margin.right;
+  const h = H - margin.top - margin.bottom;
+
+  const ftCohorts = ['2025-02', '2025-03', '2025-04', '2025-05', '2025-06'];
+  const currentMonth = '2026-04';
+  const cliffData = ftCohorts.map(cohId => {
+    const c = DATA.cohort_matrix.find(m => m.cohort === cohId);
+    const latest = c.months[c.months.length - 1];
+    const cliff = offsetMonth(cohId, 12);
+    const active = Math.round(latest.pct / 100 * c.size);
+    const lost = c.size - active;
+    let status;
+    if (cliff < currentMonth) status = 'past';
+    else if (cliff === currentMonth) status = 'current';
+    else status = 'upcoming';
+    const proj_churn = status === 'upcoming' ? Math.round(active * 0.30) : 0;
+    return { cohort: cohId, cliff, size: c.size, active, lost, status, proj_churn };
+  });
+
+  const yMax = 400;
+  const cellW = w / cliffData.length;
+  const barW = Math.min(cellW * 0.5, 80);
+
+  let html = '';
+
+  // Y-axis grid + ticks
+  for (let i = 0; i <= 4; i++) {
+    const v = (yMax / 4) * i;
+    const y = y0 + h - (v / yMax) * h;
+    html += `<line class="grid-line" x1="${x0}" y1="${y}" x2="${x0+w}" y2="${y}"/>`;
+    html += `<text class="axis-text" x="${x0-8}" y="${y+3}" text-anchor="end">${fmt(v)}</text>`;
+  }
+
+  cliffData.forEach((d, i) => {
+    const cellX = x0 + i * cellW;
+    const cx = cellX + cellW/2;
+    const x = cx - barW/2;
+    const activeH = (d.active / yMax) * h;
+    const lostH = (d.lost / yMax) * h;
+    const yActive = y0 + h - activeH;
+    const yLost = yActive - lostH;
+
+    // Status-based palette
+    let activeColor, lostColor, badgeColor, badgeText;
+    if (d.status === 'past') {
+      activeColor = '#fed7aa'; lostColor = '#e7e5e4';
+      badgeColor = C.textMute; badgeText = 'PAST';
+    } else if (d.status === 'current') {
+      activeColor = C.orangeSoft; lostColor = '#d6d3d1';
+      badgeColor = C.orange; badgeText = 'CURRENT';
+    } else {
+      activeColor = C.orange; lostColor = '#d6d3d1';
+      badgeColor = C.orange; badgeText = 'UPCOMING';
+    }
+
+    // Background tint for current/upcoming
+    if (d.status === 'current') {
+      html += `<rect x="${cellX}" y="${y0}" width="${cellW}" height="${h}" fill="${C.orangePale}"/>`;
+    } else if (d.status === 'upcoming') {
+      html += `<rect x="${cellX}" y="${y0}" width="${cellW}" height="${h}" fill="${C.orangeTint}" opacity="0.55"/>`;
+    }
+
+    // Lost (top)
+    if (d.lost > 0) {
+      html += `<rect x="${x}" y="${yLost}" width="${barW}" height="${lostH}" fill="${lostColor}"/>`;
+    }
+    // Active (bottom)
+    html += `<rect x="${x}" y="${yActive}" width="${barW}" height="${activeH}" fill="${activeColor}"/>`;
+
+    // Total label above the bar
+    html += `<text x="${cx}" y="${yLost - 8}" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="${C.text}" font-weight="500">${d.size}</text>`;
+
+    // Active count inside the bar
+    if (activeH > 22) {
+      const txtFill = d.status === 'past' ? C.gray700 : '#ffffff';
+      html += `<text x="${cx}" y="${yActive + activeH/2 + 4}" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="${txtFill}" font-weight="500">${d.active}</text>`;
+    }
+    // Lost count inside the lost segment if room
+    if (lostH > 18 && d.lost > 0) {
+      html += `<text x="${cx}" y="${yLost + lostH/2 + 3}" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="${C.textMute}">${d.lost}</text>`;
+    }
+
+    // Status badge above bar
+    html += `<text x="${cx}" y="${y0-36}" text-anchor="middle" class="ref-label" fill="${badgeColor}">${badgeText}</text>`;
+
+    // Upcoming projection callout
+    if (d.status === 'upcoming') {
+      html += `<text x="${cx}" y="${y0-20}" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="${C.orange}" font-weight="600">~${d.proj_churn} likely to churn</text>`;
+    }
+
+    // X-axis labels: cliff month (primary) + cohort (secondary)
+    const labelColor = d.status === 'upcoming' ? C.orange : d.status === 'current' ? C.orange : C.text;
+    html += `<text x="${cx}" y="${y0+h+18}" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="11" fill="${labelColor}" font-weight="500">${fmtMonth(d.cliff)}</text>`;
+    html += `<text x="${cx}" y="${y0+h+33}" text-anchor="middle" class="axis-text">from ${fmtMonth(d.cohort)} cohort</text>`;
+
+    // Hover overlay
+    html += `<rect x="${cellX}" y="${y0}" width="${cellW}" height="${h}" fill="transparent" data-tooltip="cliff" data-i="${i}" style="cursor:pointer"/>`;
+  });
+
+  svg.innerHTML = html;
+
+  svg.querySelectorAll('[data-tooltip="cliff"]').forEach(el => {
+    el.addEventListener('mousemove', e => {
+      const d = cliffData[+el.dataset.i];
+      const statusLabel = d.status === 'past' ? 'Past cliff' : d.status === 'current' ? 'Current cliff' : 'Upcoming cliff';
+      const statusColor = d.status === 'past' ? C.textMute : C.orange;
+      let extra = '';
+      if (d.status === 'upcoming') {
+        extra = `<div class="tooltip-row"><span class="swatch" style="background:transparent"></span><span class="label">Proj. churn (~30%)</span><span class="val" style="color:${C.orange}">~${d.proj_churn}</span></div>
+        <div class="tooltip-row"><span class="swatch" style="background:transparent"></span><span class="label">Proj. convert</span><span class="val">~${d.active - d.proj_churn}</span></div>`;
+      }
+      showTooltip(e, `<div class="tooltip-month">${fmtMonth(d.cohort)} cohort · cliff ${fmtMonth(d.cliff)}</div>
+        <div class="tooltip-row"><span class="swatch" style="background:transparent"></span><span class="label">Status</span><span class="val" style="color:${statusColor}">${statusLabel}</span></div>
+        <div class="tooltip-row"><span class="swatch" style="background:#d6d3d1"></span><span class="label">Original size</span><span class="val">${d.size}</span></div>
+        <div class="tooltip-row"><span class="swatch" style="background:${C.orange}"></span><span class="label">Currently active</span><span class="val">${d.active}</span></div>
+        <div class="tooltip-row"><span class="swatch" style="background:#a8a29e"></span><span class="label">Already lost</span><span class="val">${d.lost}</span></div>
+        ${extra}`);
+    });
+    el.addEventListener('mouseleave', hideTooltip);
+  });
+}
+
+function drawAll() {
+  drawCliff();
+  drawComposition();
+  drawCumulative();
+  drawChurn();
+  drawFTC();
+  drawRevenue();
+  drawNet();
+}
+
+// Init
+renderKpis();
+renderHeatmap();
+renderWaterfall();
+drawAll();
+
+// Redraw on resize
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(drawAll, 200);
+});
+</script>
+
+</body>
+</html>
