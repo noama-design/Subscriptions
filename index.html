@@ -731,30 +731,43 @@
     </div>
   </div>
 
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:12px">
-    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.13em;color:var(--text-mute)">Scenario</div>
-    <div class="scenario-toggle" id="scenario-toggle">
-      <button data-scenario="low">Optimistic</button>
-      <button data-scenario="mid" class="active">Base</button>
-      <button data-scenario="high">Pessimistic</button>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:16px">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.13em;color:var(--text-mute)">Scenario</span>
+      <div class="scenario-toggle" id="scenario-toggle">
+        <button data-scenario="low">Optimistic</button>
+        <button data-scenario="mid" class="active">Base</button>
+        <button data-scenario="high">Pessimistic</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:18px;align-items:center">
+      <div style="display:flex;flex-direction:column;align-items:flex-end">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:0.14em;color:var(--text-mute)">Base attrition</span>
+        <span id="assumption-base" style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;color:var(--text)">2.0% / month</span>
+      </div>
+      <div style="width:1px;height:28px;background:var(--border)"></div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:0.14em;color:var(--text-mute)">Cliff churn</span>
+        <span id="assumption-cliff" style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;color:var(--orange)">30% of still-free</span>
+      </div>
     </div>
   </div>
 
   <div class="grid grid-3" style="margin-bottom:20px">
     <div class="card kpi">
-      <div class="kpi-label">3-month forecast (May–Jul)</div>
-      <div class="kpi-value" id="kpi-3mo">417</div>
-      <div class="kpi-sub" id="kpi-3mo-sub">customers projected to churn</div>
+      <div class="kpi-label">June peak rate</div>
+      <div class="kpi-value" id="kpi-peak-rate">4.15%</div>
+      <div class="kpi-sub" id="kpi-peak-sub">~200 customers · single-month forecast</div>
     </div>
     <div class="card kpi alert">
-      <div class="kpi-label">June peak</div>
-      <div class="kpi-value" id="kpi-peak">200</div>
-      <div class="kpi-sub" id="kpi-peak-sub">single-month forecast</div>
+      <div class="kpi-label">8-month avg rate</div>
+      <div class="kpi-value" id="kpi-avg-rate">2.47%</div>
+      <div class="kpi-sub" id="kpi-avg-sub">May–Dec '26 · vs. 2.4% trailing 12-mo</div>
     </div>
     <div class="card kpi">
-      <div class="kpi-label">8-month forecast (May–Dec)</div>
+      <div class="kpi-label">8-month total churn</div>
       <div class="kpi-value" id="kpi-8mo">955</div>
-      <div class="kpi-sub" id="kpi-8mo-sub">total churn through year-end</div>
+      <div class="kpi-sub" id="kpi-8mo-sub">customers projected May–Dec</div>
     </div>
   </div>
 
@@ -770,6 +783,7 @@
       <div class="legend">
         <span class="legend-item"><span class="legend-swatch" style="background:var(--gray-500)"></span>Base attrition</span>
         <span class="legend-item"><span class="legend-swatch" style="background:var(--orange)"></span>Cliff churn</span>
+        <span class="legend-item"><span style="display:inline-block;width:14px;height:1px;background:var(--black)"></span> Implied churn rate (right axis)</span>
       </div>
     </div>
   </div>
@@ -1196,24 +1210,32 @@ function drawForecast() {
   const W = svg.parentElement.clientWidth;
   const H = 340;
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
-  const m = { top: 28, right: 24, bottom: 32, left: 50 };
+  const m = { top: 38, right: 50, bottom: 32, left: 50 };
   const x0 = m.left, y0 = m.top;
   const w = W - m.left - m.right, h = H - m.top - m.bottom;
   const data = FORECAST;
   const yMax = 250;
+  const yMaxRate = 6;  // right axis: 0-6%
   const cellW = w / data.length;
-  const barW = cellW * 0.65;
+  const barW = cellW * 0.6;
   let html = '';
+  // Left axis (count)
   for (let i = 0; i <= 5; i++) {
     const v = (yMax / 5) * i, y = y0 + h - (v / yMax) * h;
     html += `<line class="grid-line" x1="${x0}" y1="${y}" x2="${x0+w}" y2="${y}"/>`;
     html += `<text class="axis-text" x="${x0-8}" y="${y+3}" text-anchor="end">${v}</text>`;
   }
+  // Right axis (rate %)
+  for (let i = 0; i <= 5; i++) {
+    const v = (yMaxRate / 5) * i, y = y0 + h - (v / yMaxRate) * h;
+    html += `<text class="axis-text" x="${x0+w+8}" y="${y+3}" text-anchor="start" fill="${C.black}">${v}%</text>`;
+  }
   data.forEach((d, i) => {
     const x = x0 + (i + 0.5) * cellW;
     html += `<text class="axis-text" x="${x}" y="${y0+h+16}" text-anchor="middle">${fmtMonth(d.month)}</text>`;
   });
-  const baseKey = `base_${currentScenario}`, cliffKey = `cliff_${currentScenario}`, totalKey = `total_${currentScenario}`;
+  const baseKey = `base_${currentScenario}`, cliffKey = `cliff_${currentScenario}`, totalKey = `total_${currentScenario}`, rateKey = `rate_${currentScenario}`;
+  // Bars (stacked: base + cliff)
   data.forEach((d, i) => {
     const x = x0 + (i + 0.5) * cellW - barW / 2;
     const baseH = (d[baseKey] / yMax) * h;
@@ -1222,8 +1244,25 @@ function drawForecast() {
     const yCliff = yBase - cliffH;
     html += `<rect x="${x}" y="${yBase}" width="${barW}" height="${baseH}" fill="${C.gray500}" rx="1"/>`;
     if (cliffH > 0) html += `<rect x="${x}" y="${yCliff}" width="${barW}" height="${cliffH}" fill="${C.orange}" rx="1"/>`;
-    // Total label
-    html += `<text x="${x + barW/2}" y="${yCliff - 6}" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="11" fill="${C.text}" font-weight="500">${d[totalKey]}</text>`;
+  });
+  // Rate line (right axis)
+  let path = '';
+  data.forEach((d, i) => {
+    const x = x0 + (i + 0.5) * cellW;
+    const y = y0 + h - (d[rateKey] / yMaxRate) * h;
+    path += (i ? 'L' : 'M') + x + ' ' + y + ' ';
+  });
+  html += `<path d="${path}" fill="none" stroke="${C.black}" stroke-width="1.8"/>`;
+  // Rate dots and labels
+  data.forEach((d, i) => {
+    const x = x0 + (i + 0.5) * cellW;
+    const y = y0 + h - (d[rateKey] / yMaxRate) * h;
+    html += `<circle cx="${x}" cy="${y}" r="3" fill="${C.black}" stroke="#fff" stroke-width="1.5"/>`;
+    // Rate label above dot
+    const isJune = d.month === '2026-06';
+    const labelColor = isJune ? C.orange : C.text;
+    const labelWeight = isJune ? '600' : '500';
+    html += `<text x="${x}" y="${y - 8}" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="${isJune ? 11 : 10}" fill="${labelColor}" font-weight="${labelWeight}">${d[rateKey]}%</text>`;
   });
   html += `<line class="crosshair" y1="${y0}" y2="${y0+h}"/>`;
   html += `<rect class="hover-overlay" x="${x0}" y="${y0}" width="${w}" height="${h}"/>`;
@@ -1231,10 +1270,10 @@ function drawForecast() {
   attachCrosshair(svg, {
     x0, y0, w, h, data,
     getTooltipHtml: d => `<div class="tooltip-month">${fmtMonth(d.month)} forecast</div>
+      <div class="tooltip-row"><span class="swatch" style="background:${C.black}"></span><span class="label">Implied rate</span><span class="val" style="color:${C.orange};font-weight:500">${d[rateKey]}%</span></div>
+      <div class="tooltip-row"><span class="swatch" style="background:transparent"></span><span class="label">Total churn</span><span class="val">${d[totalKey]}</span></div>
       <div class="tooltip-row"><span class="swatch" style="background:${C.gray500}"></span><span class="label">Base attrition</span><span class="val">${d[baseKey]}</span></div>
-      <div class="tooltip-row"><span class="swatch" style="background:${C.orange}"></span><span class="label">Cliff churn</span><span class="val">${d[cliffKey]}</span></div>
-      <div class="tooltip-row"><span class="swatch" style="background:transparent"></span><span class="label">Total</span><span class="val">${d[totalKey]}</span></div>
-      <div class="tooltip-row"><span class="swatch" style="background:transparent"></span><span class="label">Implied rate</span><span class="val">${d['rate_'+currentScenario]}%</span></div>`,
+      <div class="tooltip-row"><span class="swatch" style="background:${C.orange}"></span><span class="label">Cliff churn</span><span class="val">${d[cliffKey]}</span></div>`,
   });
 }
 
@@ -1256,12 +1295,23 @@ function renderForecastTable() {
 
 function updateForecastKpis() {
   const totalKey = `total_${currentScenario}`;
-  const total3mo = FORECAST.slice(0, 3).reduce((s, d) => s + d[totalKey], 0);
+  const rateKey = `rate_${currentScenario}`;
   const total8mo = FORECAST.reduce((s, d) => s + d[totalKey], 0);
-  const peak = FORECAST.find(d => d.month === '2026-06')[totalKey];
-  document.getElementById('kpi-3mo').textContent = total3mo;
-  document.getElementById('kpi-peak').textContent = peak;
+  const peakRate = FORECAST.find(d => d.month === '2026-06')[rateKey];
+  const peakCount = FORECAST.find(d => d.month === '2026-06')[totalKey];
+  const avgRate = (FORECAST.reduce((s, d) => s + d[rateKey], 0) / FORECAST.length).toFixed(2);
+  document.getElementById('kpi-peak-rate').textContent = peakRate + '%';
+  document.getElementById('kpi-peak-sub').textContent = `~${peakCount} customers · single-month forecast`;
+  document.getElementById('kpi-avg-rate').textContent = avgRate + '%';
   document.getElementById('kpi-8mo').textContent = total8mo;
+  // Update scenario assumption display
+  const assumptions = {
+    low:  { base: '1.5% / month', cliff: '25% of still-free' },
+    mid:  { base: '2.0% / month', cliff: '30% of still-free' },
+    high: { base: '2.5% / month', cliff: '35% of still-free' },
+  };
+  document.getElementById('assumption-base').textContent  = assumptions[currentScenario].base;
+  document.getElementById('assumption-cliff').textContent = assumptions[currentScenario].cliff;
 }
 
 document.getElementById('scenario-toggle').addEventListener('click', e => {
