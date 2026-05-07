@@ -188,6 +188,16 @@
   .scenario-toggle button:hover { color: var(--text); }
   .scenario-toggle button.active { color: var(--orange); background: var(--orange-pale); }
 
+  .rate-input { width: 56px; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500; color: var(--text); border: 1px solid var(--border); background: #fff; padding: 4px 6px; border-radius: 2px; text-align: center; -moz-appearance: textfield; }
+  .rate-input:focus { outline: none; border-color: var(--orange); box-shadow: 0 0 0 2px var(--orange-pale); }
+  .rate-input::-webkit-outer-spin-button, .rate-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .rate-input.cliff { color: var(--orange); }
+  .rate-control { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+  .rate-control-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--text-mute); }
+  .rate-control-row { display: flex; align-items: center; gap: 6px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-mute); }
+  .custom-badge { font-family: 'JetBrains Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: 0.14em; color: var(--orange); padding: 2px 8px; border: 1px solid var(--orange); border-radius: 2px; opacity: 0; transition: opacity 120ms; }
+  .custom-badge.visible { opacity: 1; }
+
   /* Tooltip */
   .tooltip { position: fixed; pointer-events: none; background: var(--surface); border: 1px solid var(--border-strong); box-shadow: 0 6px 20px rgba(24,24,27,0.08); padding: 10px 12px; font-family: 'JetBrains Mono', monospace; font-size: 11px; z-index: 100; opacity: 0; transition: opacity 80ms; min-width: 160px; border-radius: 3px; }
   .tooltip.visible { opacity: 1; }
@@ -772,7 +782,7 @@
   <div class="recommend-block" style="border-left-color:var(--gray-700)">
     <div class="recommend-label" style="color:var(--gray-700)">Methodology · Use with caution</div>
     <div class="recommend-text" style="color:var(--text-mute)">
-      This is a model, not a guarantee. Forecast = <strong>monthly base attrition rate × current active base</strong> + <strong>cliff churn (still-on-free × cliff loss rate)</strong>. Three scenarios shown: optimistic (1.5% base, 25% cliff), base (2.0% base, 30% cliff), pessimistic (2.5% base, 35% cliff). Base rate calibrated from pre-cliff months (Sep '25–Jan '26 = 1.87% avg). The model assumes acquisition is constant; if new subscriber rate changes materially, all numbers shift.
+      This is a model, not a guarantee. Forecast = <strong>monthly base attrition rate × current active base</strong> + <strong>cliff churn (still-on-free × cliff loss rate)</strong>. Three preset scenarios shown: optimistic (2.0% base / 25% cliff), base (2.5% / 30%), pessimistic (3.0% / 35%). The 2.5% base reflects structural sources — onboarding churn (M0 = 5.5%), settled attrition (M1–M8 ~1.1%), and pre-cliff anticipation (M9 = 3.3%). <strong>Adjust the rates manually below to test alternative assumptions.</strong>
     </div>
   </div>
 
@@ -784,16 +794,23 @@
         <button data-scenario="mid" class="active">Base</button>
         <button data-scenario="high">Pessimistic</button>
       </div>
+      <span class="custom-badge" id="custom-badge">Custom</span>
     </div>
     <div style="display:flex;gap:18px;align-items:center">
-      <div style="display:flex;flex-direction:column;align-items:flex-end">
-        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:0.14em;color:var(--text-mute)">Base attrition</span>
-        <span id="assumption-base" style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;color:var(--text)">2.0% / month</span>
+      <div class="rate-control">
+        <span class="rate-control-label">Base attrition</span>
+        <span class="rate-control-row">
+          <input type="number" class="rate-input" id="input-base" value="2.5" min="0" max="20" step="0.1" />
+          <span>% / month</span>
+        </span>
       </div>
-      <div style="width:1px;height:28px;background:var(--border)"></div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end">
-        <span style="font-family:'JetBrains Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:0.14em;color:var(--text-mute)">Cliff churn</span>
-        <span id="assumption-cliff" style="font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;color:var(--orange)">30% of still-free</span>
+      <div style="width:1px;height:36px;background:var(--border)"></div>
+      <div class="rate-control">
+        <span class="rate-control-label">Cliff churn</span>
+        <span class="rate-control-row">
+          <input type="number" class="rate-input cliff" id="input-cliff" value="30" min="0" max="100" step="1" />
+          <span>% of still-free</span>
+        </span>
       </div>
     </div>
   </div>
@@ -801,17 +818,17 @@
   <div class="grid grid-3" style="margin-bottom:20px">
     <div class="card kpi">
       <div class="kpi-label">June peak rate</div>
-      <div class="kpi-value" id="kpi-peak-rate">4.12%</div>
-      <div class="kpi-sub" id="kpi-peak-sub">~200 customers · single-month forecast</div>
+      <div class="kpi-value" id="kpi-peak-rate">4.61%</div>
+      <div class="kpi-sub" id="kpi-peak-sub">~224 customers · single-month forecast</div>
     </div>
     <div class="card kpi alert">
       <div class="kpi-label">8-month avg rate</div>
-      <div class="kpi-value" id="kpi-avg-rate">2.47%</div>
+      <div class="kpi-value" id="kpi-avg-rate">2.96%</div>
       <div class="kpi-sub" id="kpi-avg-sub">May–Dec '26 · vs. 2.6% trailing 12-mo</div>
     </div>
     <div class="card kpi">
       <div class="kpi-label">8-month total churn</div>
-      <div class="kpi-value" id="kpi-8mo">961</div>
+      <div class="kpi-value" id="kpi-8mo">1,153</div>
       <div class="kpi-sub" id="kpi-8mo-sub">customers projected May–Dec</div>
     </div>
   </div>
@@ -887,7 +904,35 @@ const CLIFF = [{"cliff_month":"2026-02","size":7,"converted":3,"still_free":0,"c
 const LIFECYCLE = [{"m":0,"churned":296,"reached":5365,"rate":5.52},{"m":1,"churned":49,"reached":4532,"rate":1.08},{"m":2,"churned":42,"reached":4321,"rate":0.97},{"m":3,"churned":43,"reached":4011,"rate":1.07},{"m":4,"churned":51,"reached":3178,"rate":1.60},{"m":5,"churned":20,"reached":2847,"rate":0.70},{"m":6,"churned":23,"reached":2680,"rate":0.86},{"m":7,"churned":30,"reached":2545,"rate":1.18},{"m":8,"churned":21,"reached":2098,"rate":1.00},{"m":9,"churned":63,"reached":1889,"rate":3.34},{"m":10,"churned":206,"reached":1134,"rate":18.17},{"m":11,"churned":62,"reached":572,"rate":10.84},{"m":12,"churned":9,"reached":141,"rate":6.38},{"m":13,"churned":7,"reached":11,"rate":63.64}];
 
 // Forecast data
-const FORECAST = [{"month":"2026-05","cliff":12,"base_low":73,"base_mid":97,"base_high":121,"cliff_low":3,"cliff_mid":4,"cliff_high":4,"total_low":76,"total_mid":101,"total_high":125,"rate_low":1.56,"rate_mid":2.08,"rate_high":2.57},{"month":"2026-06","cliff":344,"base_low":73,"base_mid":97,"base_high":121,"cliff_low":86,"cliff_mid":103,"cliff_high":120,"total_low":159,"total_mid":200,"total_high":241,"rate_low":3.27,"rate_mid":4.12,"rate_high":4.96},{"month":"2026-07","cliff":74,"base_low":73,"base_mid":97,"base_high":121,"cliff_low":18,"cliff_mid":22,"cliff_high":26,"total_low":91,"total_mid":119,"total_high":147,"rate_low":1.87,"rate_mid":2.45,"rate_high":3.03},{"month":"2026-08","cliff":69,"base_low":73,"base_mid":97,"base_high":121,"cliff_low":17,"cliff_mid":21,"cliff_high":24,"total_low":90,"total_mid":118,"total_high":145,"rate_low":1.85,"rate_mid":2.43,"rate_high":2.98},{"month":"2026-09","cliff":11,"base_low":73,"base_mid":97,"base_high":121,"cliff_low":3,"cliff_mid":3,"cliff_high":4,"total_low":76,"total_mid":100,"total_high":125,"rate_low":1.56,"rate_mid":2.06,"rate_high":2.57},{"month":"2026-10","cliff":21,"base_low":73,"base_mid":97,"base_high":121,"cliff_low":5,"cliff_mid":6,"cliff_high":7,"total_low":78,"total_mid":103,"total_high":128,"rate_low":1.61,"rate_mid":2.12,"rate_high":2.63},{"month":"2026-11","cliff":38,"base_low":73,"base_mid":97,"base_high":121,"cliff_low":10,"cliff_mid":11,"cliff_high":13,"total_low":83,"total_mid":108,"total_high":134,"rate_low":1.71,"rate_mid":2.22,"rate_high":2.76},{"month":"2026-12","cliff":51,"base_low":73,"base_mid":97,"base_high":121,"cliff_low":13,"cliff_mid":15,"cliff_high":18,"total_low":86,"total_mid":112,"total_high":139,"rate_low":1.77,"rate_mid":2.31,"rate_high":2.86}];
+// Forecast model — base attrition + cliff churn, computed dynamically from current rates
+const ACTIVE_BASE = 4858;
+const FORECAST_SCHEDULE = [
+  {month:"2026-05", cliff:12},
+  {month:"2026-06", cliff:344},
+  {month:"2026-07", cliff:74},
+  {month:"2026-08", cliff:69},
+  {month:"2026-09", cliff:11},
+  {month:"2026-10", cliff:21},
+  {month:"2026-11", cliff:38},
+  {month:"2026-12", cliff:51},
+];
+const SCENARIO_PRESETS = {
+  low:  { base: 2.0, cliff: 25 },
+  mid:  { base: 2.5, cliff: 30 },
+  high: { base: 3.0, cliff: 35 },
+};
+let baseRate = 2.5;   // % per month
+let cliffRate = 30;   // % of still-free
+let activeScenario = 'mid';
+function computeForecast() {
+  return FORECAST_SCHEDULE.map(d => {
+    const baseChurn = Math.round(ACTIVE_BASE * baseRate / 100);
+    const cliffChurn = Math.round(d.cliff * cliffRate / 100);
+    const total = baseChurn + cliffChurn;
+    const rate = +(total / ACTIVE_BASE * 100).toFixed(2);
+    return { month: d.month, cliff: d.cliff, baseChurn, cliffChurn, total, rate };
+  });
+}
 
 const COHORTS = [{"cohort":"2025-02","size":13,"months":[{"offset":0,"pct":100},{"offset":1,"pct":100},{"offset":2,"pct":100},{"offset":3,"pct":100},{"offset":4,"pct":100},{"offset":5,"pct":92.3},{"offset":6,"pct":100},{"offset":7,"pct":100},{"offset":8,"pct":100},{"offset":9,"pct":100},{"offset":10,"pct":100},{"offset":11,"pct":84.6},{"offset":12,"pct":84.6},{"offset":13,"pct":84.6},{"offset":14,"pct":30.8}]},{"cohort":"2025-03","size":174,"months":[{"offset":0,"pct":100},{"offset":1,"pct":99.4},{"offset":2,"pct":98.9},{"offset":3,"pct":98.3},{"offset":4,"pct":98.3},{"offset":5,"pct":98.3},{"offset":6,"pct":98.3},{"offset":7,"pct":98.3},{"offset":8,"pct":98.9},{"offset":9,"pct":98.9},{"offset":10,"pct":87.9},{"offset":11,"pct":75.9},{"offset":12,"pct":74.7},{"offset":13,"pct":69.5}]},{"cohort":"2025-04","size":541,"months":[{"offset":0,"pct":100},{"offset":1,"pct":98.7},{"offset":2,"pct":98.2},{"offset":3,"pct":97.6},{"offset":4,"pct":97.2},{"offset":5,"pct":96.5},{"offset":6,"pct":96.5},{"offset":7,"pct":95.6},{"offset":8,"pct":95.4},{"offset":9,"pct":94.6},{"offset":10,"pct":94.8},{"offset":11,"pct":79.3},{"offset":12,"pct":68.2}]},{"cohort":"2025-05","size":496,"months":[{"offset":0,"pct":100},{"offset":1,"pct":98.2},{"offset":2,"pct":98.6},{"offset":3,"pct":98},{"offset":4,"pct":98},{"offset":5,"pct":98},{"offset":6,"pct":97},{"offset":7,"pct":96.8},{"offset":8,"pct":95.2},{"offset":9,"pct":94},{"offset":10,"pct":91.7},{"offset":11,"pct":71.8}]},{"cohort":"2025-06","size":767,"months":[{"offset":0,"pct":100},{"offset":1,"pct":97.9},{"offset":2,"pct":97.9},{"offset":3,"pct":98},{"offset":4,"pct":98.2},{"offset":5,"pct":96.1},{"offset":6,"pct":95.3},{"offset":7,"pct":95.4},{"offset":8,"pct":95.3},{"offset":9,"pct":94.7},{"offset":10,"pct":90.2}]},{"cohort":"2025-07","size":218,"months":[{"offset":0,"pct":100},{"offset":1,"pct":95.4},{"offset":2,"pct":96.3},{"offset":3,"pct":97.2},{"offset":4,"pct":93.1},{"offset":5,"pct":91.3},{"offset":6,"pct":91.3},{"offset":7,"pct":90.8},{"offset":8,"pct":89},{"offset":9,"pct":86.2}]},{"cohort":"2025-08","size":490,"months":[{"offset":0,"pct":100},{"offset":1,"pct":97.8},{"offset":2,"pct":97.8},{"offset":3,"pct":95.7},{"offset":4,"pct":91.8},{"offset":5,"pct":91.2},{"offset":6,"pct":89.8},{"offset":7,"pct":88.6},{"offset":8,"pct":85.1}]},{"cohort":"2025-09","size":158,"months":[{"offset":0,"pct":100},{"offset":1,"pct":94.3},{"offset":2,"pct":81.6},{"offset":3,"pct":78.5},{"offset":4,"pct":79.7},{"offset":5,"pct":78.5},{"offset":6,"pct":77.8},{"offset":7,"pct":70.9}]},{"cohort":"2025-10","size":171,"months":[{"offset":0,"pct":100},{"offset":1,"pct":94.2},{"offset":2,"pct":91.8},{"offset":3,"pct":90.1},{"offset":4,"pct":90.1},{"offset":5,"pct":87.1},{"offset":6,"pct":86}]},{"cohort":"2025-11","size":311,"months":[{"offset":0,"pct":100},{"offset":1,"pct":96.5},{"offset":2,"pct":97.1},{"offset":3,"pct":95.2},{"offset":4,"pct":95.2},{"offset":5,"pct":90}]},{"cohort":"2025-12","size":878,"months":[{"offset":0,"pct":100},{"offset":1,"pct":95.1},{"offset":2,"pct":93.5},{"offset":3,"pct":91.8},{"offset":4,"pct":90}]},{"cohort":"2026-01","size":305,"months":[{"offset":0,"pct":100},{"offset":1,"pct":91.8},{"offset":2,"pct":87.5},{"offset":3,"pct":87.9}]},{"cohort":"2026-02","size":263,"months":[{"offset":0,"pct":100},{"offset":1,"pct":61.6},{"offset":2,"pct":61.6}]},{"cohort":"2026-03","size":580,"months":[{"offset":0,"pct":100},{"offset":1,"pct":92.6}]},{"cohort":"2026-04","size":415,"months":[{"offset":0,"pct":100}]}];
 
@@ -1250,7 +1295,6 @@ function renderCliffTable() {
 }
 
 // Forecast
-let currentScenario = 'mid';
 function drawForecast() {
   const svg = document.getElementById('chart-forecast');
   if (!svg || !svg.parentElement.offsetWidth) return;
@@ -1260,9 +1304,12 @@ function drawForecast() {
   const m = { top: 38, right: 50, bottom: 32, left: 50 };
   const x0 = m.left, y0 = m.top;
   const w = W - m.left - m.right, h = H - m.top - m.bottom;
-  const data = FORECAST;
-  const yMax = 250;
-  const yMaxRate = 6;  // right axis: 0-6%
+  const data = computeForecast();
+  // Y-axis maxes scale dynamically based on data
+  const maxTotal = Math.max(...data.map(d => d.total));
+  const maxRate = Math.max(...data.map(d => d.rate));
+  const yMax = Math.max(250, Math.ceil(maxTotal / 50) * 50 + 50);
+  const yMaxRate = Math.max(6, Math.ceil(maxRate) + 1);
   const cellW = w / data.length;
   const barW = cellW * 0.6;
   let html = '';
@@ -1270,10 +1317,11 @@ function drawForecast() {
   for (let i = 0; i <= 5; i++) {
     const v = (yMax / 5) * i, y = y0 + h - (v / yMax) * h;
     html += `<line class="grid-line" x1="${x0}" y1="${y}" x2="${x0+w}" y2="${y}"/>`;
-    html += `<text class="axis-text" x="${x0-8}" y="${y+3}" text-anchor="end">${v}</text>`;
+    html += `<text class="axis-text" x="${x0-8}" y="${y+3}" text-anchor="end">${Math.round(v)}</text>`;
   }
-  // Right axis (rate %)
-  for (let v = 0; v <= 6; v++) {
+  // Right axis (rate %) — integer steps
+  const rateStep = Math.max(1, Math.ceil(yMaxRate / 6));
+  for (let v = 0; v <= yMaxRate; v += rateStep) {
     const y = y0 + h - (v / yMaxRate) * h;
     html += `<text class="axis-text" x="${x0+w+8}" y="${y+3}" text-anchor="start" fill="${C.black}">${v}%</text>`;
   }
@@ -1281,12 +1329,11 @@ function drawForecast() {
     const x = x0 + (i + 0.5) * cellW;
     html += `<text class="axis-text" x="${x}" y="${y0+h+16}" text-anchor="middle">${fmtMonth(d.month)}</text>`;
   });
-  const baseKey = `base_${currentScenario}`, cliffKey = `cliff_${currentScenario}`, totalKey = `total_${currentScenario}`, rateKey = `rate_${currentScenario}`;
   // Bars (stacked: base + cliff)
   data.forEach((d, i) => {
     const x = x0 + (i + 0.5) * cellW - barW / 2;
-    const baseH = (d[baseKey] / yMax) * h;
-    const cliffH = (d[cliffKey] / yMax) * h;
+    const baseH = (d.baseChurn / yMax) * h;
+    const cliffH = (d.cliffChurn / yMax) * h;
     const yBase = y0 + h - baseH;
     const yCliff = yBase - cliffH;
     html += `<rect x="${x}" y="${yBase}" width="${barW}" height="${baseH}" fill="${C.gray500}" rx="1"/>`;
@@ -1296,20 +1343,19 @@ function drawForecast() {
   let path = '';
   data.forEach((d, i) => {
     const x = x0 + (i + 0.5) * cellW;
-    const y = y0 + h - (d[rateKey] / yMaxRate) * h;
+    const y = y0 + h - (d.rate / yMaxRate) * h;
     path += (i ? 'L' : 'M') + x + ' ' + y + ' ';
   });
   html += `<path d="${path}" fill="none" stroke="${C.black}" stroke-width="1.8"/>`;
   // Rate dots and labels
   data.forEach((d, i) => {
     const x = x0 + (i + 0.5) * cellW;
-    const y = y0 + h - (d[rateKey] / yMaxRate) * h;
+    const y = y0 + h - (d.rate / yMaxRate) * h;
     html += `<circle cx="${x}" cy="${y}" r="3" fill="${C.black}" stroke="#fff" stroke-width="1.5"/>`;
-    // Rate label above dot
     const isJune = d.month === '2026-06';
     const labelColor = isJune ? C.orange : C.text;
     const labelWeight = isJune ? '600' : '500';
-    html += `<text x="${x}" y="${y - 8}" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="${isJune ? 11 : 10}" fill="${labelColor}" font-weight="${labelWeight}">${d[rateKey]}%</text>`;
+    html += `<text x="${x}" y="${y - 8}" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="${isJune ? 11 : 10}" fill="${labelColor}" font-weight="${labelWeight}">${d.rate}%</text>`;
   });
   html += `<line class="crosshair" y1="${y0}" y2="${y0+h}"/>`;
   html += `<rect class="hover-overlay" x="${x0}" y="${y0}" width="${w}" height="${h}"/>`;
@@ -1317,57 +1363,82 @@ function drawForecast() {
   attachCrosshair(svg, {
     x0, y0, w, h, data,
     getTooltipHtml: d => `<div class="tooltip-month">${fmtMonth(d.month)} forecast</div>
-      <div class="tooltip-row"><span class="swatch" style="background:${C.black}"></span><span class="label">Implied rate</span><span class="val" style="color:${C.orange};font-weight:500">${d[rateKey]}%</span></div>
-      <div class="tooltip-row"><span class="swatch" style="background:transparent"></span><span class="label">Total churn</span><span class="val">${d[totalKey]}</span></div>
-      <div class="tooltip-row"><span class="swatch" style="background:${C.gray500}"></span><span class="label">Base attrition</span><span class="val">${d[baseKey]}</span></div>
-      <div class="tooltip-row"><span class="swatch" style="background:${C.orange}"></span><span class="label">Cliff churn</span><span class="val">${d[cliffKey]}</span></div>`,
+      <div class="tooltip-row"><span class="swatch" style="background:${C.black}"></span><span class="label">Implied rate</span><span class="val" style="color:${C.orange};font-weight:500">${d.rate}%</span></div>
+      <div class="tooltip-row"><span class="swatch" style="background:transparent"></span><span class="label">Total churn</span><span class="val">${d.total}</span></div>
+      <div class="tooltip-row"><span class="swatch" style="background:${C.gray500}"></span><span class="label">Base attrition</span><span class="val">${d.baseChurn}</span></div>
+      <div class="tooltip-row"><span class="swatch" style="background:${C.orange}"></span><span class="label">Cliff churn</span><span class="val">${d.cliffChurn}</span></div>`,
   });
 }
 
 function renderForecastTable() {
   const tbody = document.getElementById('forecast-table-body');
   if (!tbody) return;
-  const baseKey = `base_${currentScenario}`, cliffKey = `cliff_${currentScenario}`, totalKey = `total_${currentScenario}`, rateKey = `rate_${currentScenario}`;
-  tbody.innerHTML = FORECAST.map(d => {
+  const data = computeForecast();
+  tbody.innerHTML = data.map(d => {
     return `<tr ${d.month === '2026-06' ? 'style="background:var(--orange-pale)"' : ''}>
       <td style="font-family:'JetBrains Mono',monospace;color:${d.month==='2026-06'?'var(--orange)':'var(--text)'};font-weight:${d.month==='2026-06'?'500':'400'}">${fmtMonth(d.month)}</td>
       <td>${d.cliff || '—'}</td>
-      <td>${d[baseKey]}</td>
-      <td><span style="color:var(--orange)">${d[cliffKey]}</span></td>
-      <td style="font-weight:500">${d[totalKey]}</td>
-      <td>${d[rateKey]}%</td>
+      <td>${d.baseChurn}</td>
+      <td><span style="color:var(--orange)">${d.cliffChurn}</span></td>
+      <td style="font-weight:500">${d.total}</td>
+      <td>${d.rate}%</td>
     </tr>`;
   }).join('');
 }
 
 function updateForecastKpis() {
-  const totalKey = `total_${currentScenario}`;
-  const rateKey = `rate_${currentScenario}`;
-  const total8mo = FORECAST.reduce((s, d) => s + d[totalKey], 0);
-  const peakRate = FORECAST.find(d => d.month === '2026-06')[rateKey];
-  const peakCount = FORECAST.find(d => d.month === '2026-06')[totalKey];
-  const avgRate = (FORECAST.reduce((s, d) => s + d[rateKey], 0) / FORECAST.length).toFixed(2);
+  const data = computeForecast();
+  const total8mo = data.reduce((s, d) => s + d.total, 0);
+  const peakRate = data.find(d => d.month === '2026-06').rate;
+  const peakCount = data.find(d => d.month === '2026-06').total;
+  const avgRate = (data.reduce((s, d) => s + d.rate, 0) / data.length).toFixed(2);
   document.getElementById('kpi-peak-rate').textContent = peakRate + '%';
   document.getElementById('kpi-peak-sub').textContent = `~${peakCount} customers · single-month forecast`;
   document.getElementById('kpi-avg-rate').textContent = avgRate + '%';
   document.getElementById('kpi-8mo').textContent = total8mo;
-  // Update scenario assumption display
-  const assumptions = {
-    low:  { base: '1.5% / month', cliff: '25% of still-free' },
-    mid:  { base: '2.0% / month', cliff: '30% of still-free' },
-    high: { base: '2.5% / month', cliff: '35% of still-free' },
-  };
-  document.getElementById('assumption-base').textContent  = assumptions[currentScenario].base;
-  document.getElementById('assumption-cliff').textContent = assumptions[currentScenario].cliff;
+}
+
+function refreshForecast() {
+  drawForecast();
+  renderForecastTable();
+  updateForecastKpis();
+}
+
+function syncCustomBadge() {
+  const preset = SCENARIO_PRESETS[activeScenario];
+  const isCustom = !preset || preset.base !== baseRate || preset.cliff !== cliffRate;
+  document.getElementById('custom-badge').classList.toggle('visible', isCustom);
+}
+
+function applyScenario(name) {
+  const preset = SCENARIO_PRESETS[name];
+  if (!preset) return;
+  activeScenario = name;
+  baseRate = preset.base;
+  cliffRate = preset.cliff;
+  document.getElementById('input-base').value = baseRate.toFixed(1);
+  document.getElementById('input-cliff').value = cliffRate;
+  document.querySelectorAll('#scenario-toggle button').forEach(b =>
+    b.classList.toggle('active', b.dataset.scenario === name));
+  syncCustomBadge();
+  refreshForecast();
 }
 
 document.getElementById('scenario-toggle').addEventListener('click', e => {
   if (e.target.tagName !== 'BUTTON') return;
-  currentScenario = e.target.dataset.scenario;
-  document.querySelectorAll('#scenario-toggle button').forEach(b => b.classList.toggle('active', b === e.target));
-  drawForecast();
-  renderForecastTable();
-  updateForecastKpis();
+  applyScenario(e.target.dataset.scenario);
+});
+
+['input-base', 'input-cliff'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('input', () => {
+    const v = parseFloat(el.value);
+    if (isNaN(v) || v < 0) return;
+    if (id === 'input-base') baseRate = v;
+    else cliffRate = v;
+    syncCustomBadge();
+    refreshForecast();
+  });
 });
 
 // Heatmap
