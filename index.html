@@ -238,6 +238,7 @@
       <button class="tab" data-tab="detailed"><span class="tab-num">02</span>Detailed Dashboard</button>
       <button class="tab" data-tab="cliff"><span class="tab-num">03</span>Cliff Schedule</button>
       <button class="tab" data-tab="forecast"><span class="tab-num">04</span>Churn Forecast</button>
+      <button class="tab" data-tab="movement"><span class="tab-num">05</span>Subscriber Movement</button>
     </div>
   </div>
 </header>
@@ -876,6 +877,69 @@
 
 </div>
 
+<!-- ===================== TAB 5: SUBSCRIBER MOVEMENT ===================== -->
+<div class="panel" data-panel="movement">
+
+  <div class="recommend-block" style="border-left-color:var(--gray-700)">
+    <div class="recommend-label" style="color:var(--gray-700)">Subscriber waterfall</div>
+    <div class="recommend-text" style="color:var(--text-mute)">
+      Full monthly movement: <strong>Starting + New − Churned + Reactivated = Ending</strong>. Over the full period, <strong>922 net customers churned</strong> (1,163 left, 241 returned) — this is the accumulated churn used elsewhere in the dashboard. The Churned and Reactivated columns are kept separate per month so the monthly math reconciles cleanly; the "Net churn %" column shows the effective rate accounting for in-month reactivations.
+    </div>
+  </div>
+
+  <div class="grid grid-4" style="margin-bottom:20px">
+    <div class="card kpi">
+      <div class="kpi-label">Total acquired</div>
+      <div class="kpi-value">5,780</div>
+      <div class="kpi-sub">new subscribers Feb '25 — Apr '26</div>
+    </div>
+    <div class="card kpi alert">
+      <div class="kpi-label">Total churned</div>
+      <div class="kpi-value">922</div>
+      <div class="kpi-sub">1,163 left − 241 returned · 16.0% accumulated</div>
+    </div>
+    <div class="card kpi alert">
+      <div class="kpi-label">Avg gross monthly churn rate</div>
+      <div class="kpi-value">2.6%</div>
+      <div class="kpi-sub">trailing 12 months (May '25 — Apr '26)</div>
+    </div>
+    <div class="card kpi">
+      <div class="kpi-label">Active subscribers</div>
+      <div class="kpi-value">4,858</div>
+      <div class="kpi-sub">end of April '26 · 84.0% retention</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-title">
+        <h3>Monthly subscriber waterfall</h3>
+        <p class="card-head-sub">Each row: how the active base changed that month. Churned is shown net of reactivations (i.e., customers who left and stayed gone). Hover any header for definition.</p>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="group-table" id="movement-table">
+        <thead>
+          <tr>
+            <th title="Active subscribers at start of month (= prior month's ending)">Month</th>
+            <th title="Active at start of month">Starting</th>
+            <th title="First-time acquisitions this month">+ New</th>
+            <th title="Customers who left this month (gross)">− Churned</th>
+            <th title="Previously-churned customers who returned this month">+ Reactivated</th>
+            <th title="Active subscribers at end of month">Ending</th>
+            <th title="Gross churned ÷ Starting">Churn % (gross)</th>
+            <th title="(Churned − Reactivated) ÷ Starting">Churn % (net)</th>
+            <th title="(Ending − Starting) ÷ Starting">Net growth %</th>
+          </tr>
+        </thead>
+        <tbody id="movement-tbody"></tbody>
+        <tfoot id="movement-tfoot"></tfoot>
+      </table>
+    </div>
+  </div>
+
+</div>
+
 <footer>
   <span style="font-family:'JetBrains Mono',monospace">Source · Subscription_Orders_Data_May_26_New_Data.xlsx · 5,780 records · Feb '25 → Apr '26</span>
   <span>May '26 excluded as incomplete · Forecast model assumes constant acquisition</span>
@@ -904,6 +968,10 @@ const CLIFF = [{"cliff_month":"2026-02","size":7,"converted":3,"still_free":0,"c
 const LIFECYCLE = [{"m":0,"churned":296,"reached":5365,"rate":5.52},{"m":1,"churned":49,"reached":4532,"rate":1.08},{"m":2,"churned":42,"reached":4321,"rate":0.97},{"m":3,"churned":43,"reached":4011,"rate":1.07},{"m":4,"churned":51,"reached":3178,"rate":1.60},{"m":5,"churned":20,"reached":2847,"rate":0.70},{"m":6,"churned":23,"reached":2680,"rate":0.86},{"m":7,"churned":30,"reached":2545,"rate":1.18},{"m":8,"churned":21,"reached":2098,"rate":1.00},{"m":9,"churned":63,"reached":1889,"rate":3.34},{"m":10,"churned":206,"reached":1134,"rate":18.17},{"m":11,"churned":62,"reached":572,"rate":10.84},{"m":12,"churned":9,"reached":141,"rate":6.38},{"m":13,"churned":7,"reached":11,"rate":63.64}];
 
 // Forecast data
+// Subscriber waterfall data — gross churn + reactivated so per-month math balances.
+// Net churn (gross − reactivated) is shown as a % column; totals reconcile to 922 net churned.
+const MOVEMENT = [{"month":"2025-02","starting":0,"new":13,"churned":0,"reactivated":0,"ending":13,"gross_churn_pct":0,"net_churn_pct":0,"growth_pct":0},{"month":"2025-03","starting":13,"new":174,"churned":0,"reactivated":0,"ending":187,"gross_churn_pct":0,"net_churn_pct":0,"growth_pct":1338.46},{"month":"2025-04","starting":187,"new":541,"churned":1,"reactivated":0,"ending":727,"gross_churn_pct":0.53,"net_churn_pct":0.53,"growth_pct":288.77},{"month":"2025-05","starting":727,"new":496,"churned":9,"reactivated":1,"ending":1215,"gross_churn_pct":1.24,"net_churn_pct":1.1,"growth_pct":67.13},{"month":"2025-06","starting":1215,"new":767,"churned":16,"reactivated":3,"ending":1969,"gross_churn_pct":1.32,"net_churn_pct":1.07,"growth_pct":62.06},{"month":"2025-07","starting":1969,"new":218,"churned":24,"reactivated":6,"ending":2169,"gross_churn_pct":1.22,"net_churn_pct":0.91,"growth_pct":10.16},{"month":"2025-08","starting":2169,"new":490,"churned":23,"reactivated":9,"ending":2645,"gross_churn_pct":1.06,"net_churn_pct":0.65,"growth_pct":21.95},{"month":"2025-09","starting":2645,"new":158,"churned":31,"reactivated":19,"ending":2791,"gross_churn_pct":1.17,"net_churn_pct":0.45,"growth_pct":5.52},{"month":"2025-10","starting":2791,"new":171,"churned":21,"reactivated":15,"ending":2956,"gross_churn_pct":0.75,"net_churn_pct":0.21,"growth_pct":5.91},{"month":"2025-11","starting":2956,"new":311,"churned":81,"reactivated":7,"ending":3193,"gross_churn_pct":2.74,"net_churn_pct":2.5,"growth_pct":8.02},{"month":"2025-12","starting":3193,"new":878,"churned":65,"reactivated":14,"ending":4020,"gross_churn_pct":2.04,"net_churn_pct":1.6,"growth_pct":25.9},{"month":"2026-01","starting":4020,"new":305,"churned":107,"reactivated":30,"ending":4248,"gross_churn_pct":2.66,"net_churn_pct":1.92,"growth_pct":5.67},{"month":"2026-02","starting":4248,"new":263,"churned":118,"reactivated":36,"ending":4429,"gross_churn_pct":2.78,"net_churn_pct":1.93,"growth_pct":4.26},{"month":"2026-03","starting":4429,"new":580,"churned":283,"reactivated":36,"ending":4762,"gross_churn_pct":6.39,"net_churn_pct":5.58,"growth_pct":7.52},{"month":"2026-04","starting":4762,"new":415,"churned":384,"reactivated":65,"ending":4858,"gross_churn_pct":8.06,"net_churn_pct":6.7,"growth_pct":2.02}];
+
 // Forecast model — base attrition + cliff churn, computed dynamically from current rates
 const ACTIVE_BASE = 4858;
 const FORECAST_SCHEDULE = [
@@ -1386,6 +1454,56 @@ function renderForecastTable() {
   }).join('');
 }
 
+function fmtPct(v, decimals = 2) {
+  if (v === 0) return '—';
+  if (Math.abs(v) >= 100) return v.toFixed(0) + '%';
+  return v.toFixed(decimals) + '%';
+}
+
+function renderMovementTable() {
+  const tbody = document.getElementById('movement-tbody');
+  const tfoot = document.getElementById('movement-tfoot');
+  if (!tbody) return;
+  tbody.innerHTML = MOVEMENT.map(d => {
+    const isApr26 = d.month === '2026-04';
+    const isMar26 = d.month === '2026-03';
+    const rowStyle = isApr26 ? 'background:var(--orange-pale)' : '';
+    const monthColor = (isApr26 || isMar26) ? 'var(--orange)' : 'var(--text)';
+    const monthWeight = (isApr26 || isMar26) ? '500' : '400';
+    const grossColor = d.gross_churn_pct >= 5 ? 'var(--orange)' : 'var(--text)';
+    const netColor = d.net_churn_pct >= 5 ? 'var(--orange)' : 'var(--text)';
+    const growthColor = d.growth_pct >= 0 ? 'var(--gray-700)' : 'var(--orange)';
+    return `<tr style="${rowStyle}">
+      <td style="font-family:'JetBrains Mono',monospace;color:${monthColor};font-weight:${monthWeight}">${fmtMonth(d.month)}</td>
+      <td style="color:var(--text-mute)">${d.starting.toLocaleString()}</td>
+      <td style="color:var(--gray-700)">+${d.new.toLocaleString()}</td>
+      <td style="color:var(--orange)">${d.churned === 0 ? '—' : '−' + d.churned.toLocaleString()}</td>
+      <td style="color:var(--gray-700)">${d.reactivated === 0 ? '—' : '+' + d.reactivated.toLocaleString()}</td>
+      <td style="font-weight:500">${d.ending.toLocaleString()}</td>
+      <td style="color:${grossColor}">${fmtPct(d.gross_churn_pct)}</td>
+      <td style="color:${netColor}">${fmtPct(d.net_churn_pct)}</td>
+      <td style="color:${growthColor};font-weight:${Math.abs(d.growth_pct) >= 20 ? '500' : '400'}">${fmtPct(d.growth_pct, d.growth_pct >= 100 ? 0 : 2)}</td>
+    </tr>`;
+  }).join('');
+  const totalNew = MOVEMENT.reduce((s, d) => s + d.new, 0);
+  const totalChurned = MOVEMENT.reduce((s, d) => s + d.churned, 0);
+  const totalReact = MOVEMENT.reduce((s, d) => s + d.reactivated, 0);
+  const lastEnding = MOVEMENT[MOVEMENT.length-1].ending;
+  const avgGross = (MOVEMENT.slice(2).reduce((s,d) => s + d.gross_churn_pct, 0) / (MOVEMENT.length - 2)).toFixed(2);
+  const avgNet = (MOVEMENT.slice(2).reduce((s,d) => s + d.net_churn_pct, 0) / (MOVEMENT.length - 2)).toFixed(2);
+  tfoot.innerHTML = `<tr class="row-total" style="background:var(--surface-alt)">
+    <td style="font-weight:500">Total / avg</td>
+    <td style="color:var(--text-mute)">—</td>
+    <td style="color:var(--gray-700);font-weight:500">+${totalNew.toLocaleString()}</td>
+    <td style="color:var(--orange);font-weight:500">−${totalChurned.toLocaleString()}</td>
+    <td style="color:var(--gray-700);font-weight:500">+${totalReact.toLocaleString()}</td>
+    <td style="font-weight:500">${lastEnding.toLocaleString()}</td>
+    <td style="color:var(--text-mute)">${avgGross}% avg</td>
+    <td style="color:var(--text-mute)">${avgNet}% avg</td>
+    <td style="color:var(--text-mute)">—</td>
+  </tr>`;
+}
+
 function updateForecastKpis() {
   const data = computeForecast();
   const total8mo = data.reduce((s, d) => s + d.total, 0);
@@ -1509,6 +1627,7 @@ renderSegBar();
 renderHeatmap();
 renderCliffTable();
 renderForecastTable();
+renderMovementTable();
 updateForecastKpis();
 drawAll();
 
